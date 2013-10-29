@@ -1,23 +1,15 @@
 uint a,b;
+
 function
 begin
-	uint a;
-	d: 
-		ddd = 38*8;
-end
-a=b+3/2;
-
-if(a<2) then
- begin
- 	c=3;
- 	t=15;
- 	if(z<23)then
- 		for(a=3; a<2)
-			b=3;
-	print('lalala');
+uint a;
+ b:
+ 	c=d;
  end
-else
- d=3;
- 
-for(a=3; a<2)
-	b=3;
+a=b+c;
+
+if(a<b)then
+	a=a();
+	
+for(a=t; t<h)
+	print('entro al for');

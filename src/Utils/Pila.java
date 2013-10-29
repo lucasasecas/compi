@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Stack;
 
 public class Pila {
-	private Stack pila;
+	private Stack<String> pila;
 	List<Stack> auxiliares;
 	int tope;
 	Stack<Integer> flags;
@@ -16,15 +16,9 @@ public class Pila {
 		tope = -1;
 		flags = new Stack<Integer>();
 	}
-//	
-//	public int nuevaTransaccion(){
-//		auxiliares.add(new Stack());
-//		tope++;
-//		return auxiliares.size();
-//	}
 	
 	public void push(char c){
-		pila.push(c);
+		pila.push(c+"");
 		
 	}
 	
@@ -64,7 +58,7 @@ public class Pila {
 	public void setSaltoPrevio(int s) {
 		
 		int dec = pila.size()-1;
-		int index = pila.lastIndexOf('#');
+		int index = pila.lastIndexOf("#");
 		if(dec >= 0){
 			int val = pila.size()+s;
 			pila.set(index, "#"+val+"#" );
@@ -93,6 +87,13 @@ public class Pila {
 	
 	private int size() {
 		return pila.size();
+	}
+
+	public String[] toArray() {
+		String[] a = new String[pila.size()];
+		a = pila.toArray(a);
+		return a;
+		
 	}
 	
 	

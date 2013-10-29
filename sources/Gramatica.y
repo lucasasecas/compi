@@ -47,11 +47,11 @@ DeclaracionVariables: Tipo ListaVariables ';' {agregarRegla("declaracion de vari
 Tipo: UINT
     ;
 
-ListaVariables: ListaVariables ',' ID
-		  | ID
+ListaVariables: ListaVariables ',' ID 
+		  | ID 
 		  ;
 		  
-DeclaracionFunciones: FUNCTION BEGIN CuerpoFuncion END {agregarRegla("Declaracion de funcion");}
+DeclaracionFunciones: FUNCTION BEGIN CuerpoFuncion END {setPEFlag(); agregarRegla("Declaracion de funcion");}
 			  | FUNCTION BEGIN error{guardarError("el cuerpo de la funcion esta mal definido");} END
 			  | FUNCTION error {guardarError("falta el begin");} END
 			  ;
@@ -65,16 +65,21 @@ CuerpoFuncion: DeclaracionesFuncion InstanciasFuncion
 DeclaracionesFuncion: DeclaracionesFuncion DeclaracionVariables
 			  | DeclaracionVariables
 			  ;
-			  
-InstanciasFuncion : PuntoEntrada 
-                  | InstanciasFuncion PuntoEntrada
-                  | InstanciasFuncion Sentencia  
+
+InstanciasFuncion : InstanciasFuncion InstanciaFuncion 
+			| InstanciaFuncion 
+			;
+                  
+InstanciaFuncion: PuntoEntrada 
+                | Sentencia  
 			;
 			
-PuntoEntrada: ID ':' Sentencia 
+PuntoEntrada: CabeceraPE Sentencia
 		;
-		
-		    
+
+CabeceraPE: ID ':'  {setPEFlag(); pila.push($1.sval); pila.push("HEADER");}
+	    ;
+
 Sentencias: Sentencias Sentencia 
 	    |Sentencia 
 	    | Sentencias error{guardarError("Sentencia mal declarada o invalida");} Sentencia
@@ -84,7 +89,7 @@ Sentencia: Asignacion ';' {agregarRegla("Asignacion");}
 	   | Seleccion  {agregarRegla("Sentencia If");}
 	   | Iteracion {agregarRegla("Iteracion For");}
 	   | SalidaPantalla ';' {agregarRegla("Salida por pantalla Print");}
-	   | Return ';' {agregarRegla("Sentencia Return");}
+	   | Return ';'
 	   | LlamadaFn ';' 
 	   
 	   ;
@@ -98,7 +103,7 @@ Asignacion: AsigIzq ASIGN Expresion {
 AsigIzq: ID {pila.push($1.sval);}	    
 	 ;
 	 
-Return: RETURN '(' Expresion ')' 
+Return: RETURN '(' Expresion ')' {pila.push("RETURN");}
 	| RETURN '(' error{guardarError("sentencia return mal definida");} ';'
 	;
 	    
@@ -123,14 +128,18 @@ Termino: Termino '*' Factor {
 	 | Termino '/' error{guardarError("termino mal definido");} ';'
 	 ;
 
-Factor: ID {$$ = $1;
+Factor: ID {
+		$$ = $1;
 		pila.push($1.sval);}
-	| CTE {$$ = $1;
-		 pila.push($1.sval);}
-	| LlamadaFn
+	| CTE {
+		$$ = $1;
+		pila.push($1.sval);}
+	| LlamadaFn {pila.push("CALL");}
 	;
 
-LlamadaFn: ID '(' ')' {agregarRegla("llamada a funcion");}
+LlamadaFn: ID '(' ')' {
+		agregarRegla("llamada a funcion");
+		pila.push($1.sval);}
 	   | ID '(' error{guardarError("falta el caracter de cierre ')'. Recuerde que las llamadas a funcion no lleva argumentos");} ';'
 	   ;	 
 
@@ -171,7 +180,12 @@ Comparacion: Expresion COMP Expresion {
 		;
 
 		
-Iteracion: CabeceraIteracion BloqueSentencias {pila.nuevoSalto("BI"); pila.setSaltoPrevio(pila.getLastFlag()); pila.setSaltoPrevio(0);}
+Iteracion: CabeceraIteracion BloqueSentencias {
+			
+			pila.nuevoSalto("BI");
+			pila.setSaltoPrevio(pila.getLastFlag());
+			pila.setSaltoPrevio(0);
+		}
 	   | CabeceraIteracion error ';'
 	   ;
 	   
@@ -179,15 +193,15 @@ CabeceraIteracion: FOR '(' Asignacion ';' Comparacion2 ')' {pila.nuevoSalto("BF"
 		     | FOR '(' Asignacion ';' error ')'
 		     ;
 			
-Comparacion2: Comp2Izq COMP Expresion {pila.push($2.sval);}
+Comparacion2: Comp2Izq COMP Expresion {$$ = $1; pila.push($2.sval);}
 		| Comp2Izq COMP error{guardarError("del lado derecho de la comparacion debe ir una expresion");} ';'
 		| Comp2Izq error ';'
 		;
 
-Comp2Izq: ID {pila.setFlag(); pila.push($1.sval);}		
+Comp2Izq: ID {$$ = $1; pila.setFlag(); pila.push($1.sval);}		
 ;
 		 			 	   
-SalidaPantalla: PRINT '(' STR ')' {pila.push($3.sval); pila.push($1.sval);}
+SalidaPantalla: PRINT '(' STR ')' {pila.push($3.sval); pila.push("PRINT");}
 		  | PRINT '(' error{guardarError("falta cadena de caracteres o se escrio mal");} ')'
 		  | PRINT '(' STR error{guardarError("la sentencia print se debe cerrar con el caracter especial ')'");} ';'
 		  ;
@@ -200,6 +214,7 @@ AnalizadorLexico an;
 Vector<String> errores;
 Vector<String> reglas;
 TablaSimbolo _tds;
+boolean pEFlag = false;
 private int yylex(){
  yylval = new ParserVal();
  int t = an.getNextToken(yylval);
@@ -277,6 +292,12 @@ public void imprimirErroresSintacticos(){
 	System.out.println();
 }
 
+public void setPEFlag(){
+	if(pEFlag)
+		pila.push(":");
+	else
+		pEFlag = true;
+}
 
 private void agregarRegla(String s){
 	reglas.add(s);

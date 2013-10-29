@@ -1,5 +1,7 @@
 package al_Main;
 
+import gc_Assembler.GeneradorAssembler;
+
 import java.io.File;
 import java.util.Vector;
 
@@ -23,6 +25,8 @@ public class Main {
 		else
 			p = new Parser(); 
 		p.run();
+		GeneradorAssembler ga = new GeneradorAssembler();
+		System.out.println(ga.generateCode(p.pila.toArray()));
 		p.imprimirResultados();
 
 	}
