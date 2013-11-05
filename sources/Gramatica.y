@@ -29,7 +29,10 @@ import Utils.Pila;
 
 %%
 
-Programa: Declaraciones Sentencias
+Programa: Declaraciones {
+					alcance = "Main";
+					pila.push("MAIN");
+					} Sentencias
 	  | error {guardarError("error sintactico no identificado");} 
 	  ;
 
@@ -37,21 +40,35 @@ Declaraciones: Declaraciones Declaracion
 		| Declaracion
 		;
 
-Declaracion: DeclaracionVariables 
+Declaracion: DeclaracionVariables {
+			for(ParserVal a : $1.list){
+				if(_tds.idDeclared(a.sval, "Main"))
+					guardarError("El identificador "+a.sval+" ya ha sido declarado");
+				TuplaTablaSimbolos tupla = _tds.getTupla(a.sval);
+				tupla.set_scope("Main");
+			}
+		}
 		| DeclaracionFunciones
 		;
 
-DeclaracionVariables: Tipo ListaVariables ';' {agregarRegla("declaracion de variables");} 
+DeclaracionVariables: Tipo ListaVariables ';' {
+				for(ParserVal a : $2.list){
+	  				TuplaTablaSimbolos tupla = _tds.getTupla(a.sval);
+	  				tupla.set_type($1.sval);
+	  				tupla.set_use("Variable");
+				}
+				$$ = $2;				  
+				agregarRegla("declaracion de variables");} 
 			  ;
 			  
-Tipo: UINT
+Tipo: UINT {$$ = $1;}
     ;
 
-ListaVariables: ListaVariables ',' ID 
-		  | ID 
+ListaVariables: ListaVariables ',' ID {$1.addToList($3); $$ = $1;} 
+		  | ID {$$.addToList($1);}
 		  ;
 		  
-DeclaracionFunciones: FUNCTION BEGIN CuerpoFuncion END {setPEFlag(); agregarRegla("Declaracion de funcion");}
+DeclaracionFunciones: FUNCTION BEGIN CuerpoFuncion END {setPEFlag(); agregarRegla("Declaracion de funcion");alcance = "Main";}
 			  | FUNCTION BEGIN error{guardarError("el cuerpo de la funcion esta mal definido");} END
 			  | FUNCTION error {guardarError("falta el begin");} END
 			  ;
@@ -62,8 +79,13 @@ CuerpoFuncion: DeclaracionesFuncion InstanciasFuncion
 		 | error{guardarError("error en las declaraciones de funcion");} InstanciasFuncion
 		 ;
 
-DeclaracionesFuncion: DeclaracionesFuncion DeclaracionVariables
-			  | DeclaracionVariables
+DeclaracionesFuncion: DeclaracionVariables {
+				for(ParserVal a : $1.list){
+					if(_tds.idDeclared(a.sval, "funcion"))
+						guardarError("El identificador "+a.sval+" ya ha sido declarado");
+					_tds.changeScope(a.sval);
+				}
+			  }
 			  ;
 
 InstanciasFuncion : InstanciasFuncion InstanciaFuncion 
@@ -77,7 +99,16 @@ InstanciaFuncion: PuntoEntrada
 PuntoEntrada: CabeceraPE Sentencia
 		;
 
-CabeceraPE: ID ':'  {setPEFlag(); pila.push($1.sval); pila.push("HEADER");}
+CabeceraPE: ID ':'  {
+			setPEFlag();
+			pila.push($1.sval);
+			pila.push("HEADER");
+			if(_tds.idDeclared($1.sval, "Main"))
+				guardarError("El identificador "+$1.sval+" ya ha sido declarado");
+			TuplaTablaSimbolos tupla = _tds.getTupla($1.sval);
+			tupla.set_use("Punto de entrada");
+			tupla._scope = "Main";
+		}
 	    ;
 
 Sentencias: Sentencias Sentencia 
@@ -100,7 +131,10 @@ Asignacion: AsigIzq ASIGN Expresion {
 	    | AsigIzq ASIGN error{guardarError("se produjo error en la asignacion");}
 	    ;
 
-AsigIzq: ID {pila.push($1.sval);}	    
+AsigIzq: ID {pila.push($1.sval);
+		if(!_tds.idDeclared($1.sval, alcance))
+			guardarError("La variable '"+$1.sval+"' no ha sido declarada");
+	}	    
 	 ;
 	 
 Return: RETURN '(' Expresion ')' {pila.push("RETURN");}
@@ -130,7 +164,10 @@ Termino: Termino '*' Factor {
 
 Factor: ID {
 		$$ = $1;
-		pila.push($1.sval);}
+		pila.push($1.sval);
+		if(!_tds.idDeclared($1.sval, alcance))
+			guardarError("La variable '"+$1.sval+"' no ha sido declarada");
+	}
 	| CTE {
 		$$ = $1;
 		pila.push($1.sval);}
@@ -198,7 +235,10 @@ Comparacion2: Comp2Izq COMP Expresion {$$ = $1; pila.push($2.sval);}
 		| Comp2Izq error ';'
 		;
 
-Comp2Izq: ID {$$ = $1; pila.setFlag(); pila.push($1.sval);}		
+Comp2Izq: ID {$$ = $1; pila.setFlag(); pila.push($1.sval);
+			if(!_tds.idDeclared($1.sval, alcance))
+				guardarError("La variable '"+$1.sval+"' no ha sido declarada");	
+		}		
 ;
 		 			 	   
 SalidaPantalla: PRINT '(' STR ')' {pila.push($3.sval); pila.push("PRINT");}
@@ -214,6 +254,7 @@ AnalizadorLexico an;
 Vector<String> errores;
 Vector<String> reglas;
 TablaSimbolo _tds;
+String alcance = "funcion";
 boolean pEFlag = false;
 private int yylex(){
  yylval = new ParserVal();
@@ -227,8 +268,8 @@ private int yylex(){
 }
 
 
-public Parser(){
-	_tds = new TablaSimbolo();
+public Parser(TablaSimbolo tds){
+	_tds = tds;
 	an = new AnalizadorLexico(new File("sources/source.txt"), _tds);
 	lista = new Vector<Vector<String>>();
 	errores = new Vector<String>();
@@ -237,8 +278,8 @@ public Parser(){
 //	yydebug = true;
 }
 
-public Parser(String string) {
-	super();
+public Parser(String string, TablaSimbolo tds) {
+	this(tds);
 	an = new AnalizadorLexico(new File(string), _tds);
 }
 public void run(){

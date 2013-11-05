@@ -1,15 +1,16 @@
-uint a,b;
+uint a,b, t, h;
 
 function
 begin
-uint a;
- b:
- 	c=d;
+uint a, c, d;
+ c:
+ 		d=34;
+         c=d;
  end
 a=b+c;
 
 if(a<b)then
-	a=a();
-	
+        a=c();
+        
 for(a=t; t<h)
-	print('entro al for');
+        print('entro al for');

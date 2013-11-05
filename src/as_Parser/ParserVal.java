@@ -1,5 +1,8 @@
 package as_Parser;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import Utils.Token;
 
 //#############################################
@@ -34,6 +37,8 @@ public int row = 0;
 /**
  * object value of this 'union'
  */
+public List<ParserVal> list = new ArrayList<ParserVal>();
+
 public Object obj;
 
 //#############################################
@@ -67,15 +72,10 @@ public ParserVal(double val)
 public ParserVal(String val)
 {
   sval=val;
+
 }
 
-/**
- * Initialize me as an Object
- */
-public ParserVal(Object val)
-{
-  obj=val;
-}
+
 
 public ParserVal Clone(){
 	ParserVal np = new ParserVal();
@@ -85,6 +85,10 @@ public ParserVal Clone(){
 	return np;
 	
 }
+
+	public void addToList(ParserVal n){
+		list.add(n);
+	}
 
 }//end class
 

@@ -492,7 +492,7 @@ public class AnalizadorLexico {
 	}
 
 	public void addTokenToTDS() {
-		TuplaTablaSimbolos tupla = new TuplaTablaSimbolos(_token.sval);
+		TuplaTablaSimbolos tupla = new TuplaTablaSimbolos(new String(_token.sval));
 		tupla._kind = _token.kind;
 		_tds.addTupla(tupla);
 		

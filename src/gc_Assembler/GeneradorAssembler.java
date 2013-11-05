@@ -1,9 +1,13 @@
 package gc_Assembler;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Stack;
 import java.util.Vector;
+
+import Utils.TablaSimbolo;
+import Utils.TuplaTablaSimbolos;
 
 public class GeneradorAssembler {
 	
@@ -12,17 +16,45 @@ public class GeneradorAssembler {
 	Vector<Integer> labels;
 	int auxCounter = 0;
 	private String lastCmp;
-	String[] operators ={"HEADER", ":",  "RETURN", "+", "-", "*", "/", "=", "<", ">", "<=", ">=", "==", "!=", "BF", "BI", "PRINT", "CALL"};
+	String[] operators ={"HEADER", "MAIN",  ":",  "RETURN", "+", "-", "*", "/", "=", "<", ">", "<=", ">=", "==", "!=", "BF", "BI", "PRINT", "CALL"};
+	private boolean onMain = false;
+	TablaSimbolo _tds;
+	private PrintWriter archivo;
 	
-	public GeneradorAssembler(){
+	public GeneradorAssembler(TablaSimbolo tds, String pathArchivo, String[] codigoIntermedio){
+		_tds = tds;
 		intermedio = new Vector<String>();
 		labels = new Vector<Integer>();
 		pila = new Stack<String>();
+		intermedio.addAll(Arrays.asList(codigoIntermedio));
+		try{
+			this.archivo = new PrintWriter(pathArchivo);
+			this.generarEncabezados();
+			String codigo = generateCode();
+			this.generarVariables();
+			archivo.println(codigo);
+		} catch(Exception e){
+			System.err.println("Imposible generar codigo assembler");
+		}
+		archivo.close();
 	}
 	
-	public String generateCode(String[] codigoIntermedio){
-		intermedio.addAll(Arrays.asList(codigoIntermedio));
-		String code = new String();
+	private void generarEncabezados() {
+		archivo.println(".386");
+		archivo.println(".model flat, stdcall");
+		archivo.println("option casemap :none");
+		archivo.println("include \\masm32\\include\\windows.inc");
+		archivo.println("include \\masm32\\include\\kernel32.inc");
+		archivo.println("include \\masm32\\include\\user32.inc");
+		archivo.println("include \\masm32\\include\\masm32.inc");
+		archivo.println("includelib \\masm32\\lib\\kernel32.lib");
+		archivo.println("includelib \\masm32\\lib\\user32.lib");
+		archivo.println("includelib \\masm32\\lib\\masm32.lib");
+		
+	}
+
+	private String generateCode(){
+		String code = ".code"+'\n'+"start:"+'\n'+"JMP _start"+'\n';
 		this.procLabels();
 		int i = 0;
 		for( i=0; i<intermedio.size(); i++){
@@ -38,8 +70,29 @@ public class GeneradorAssembler {
 		}
 		if(isLabel(i)){
 			code += "label_"+i+":"+'\n';
-		}
+		}		
 		return code;
+	}
+
+	private void generarVariables() {
+		
+		archivo.println(".data");
+		archivo.println("_string	DW	\"empty\"");
+		for(TuplaTablaSimbolos tupla : _tds.values()){
+			int kind = tupla._kind;
+			if(kind == 257){
+				if(tupla._use != null){
+					if(tupla._use.equals("Variable"))
+						archivo.println("_"+tupla._value+"	DW	0");
+					if(tupla._use.equals("Punto de entrada")){
+						archivo.println("$"+tupla._value+"	DW	0");
+					}
+				}
+			}
+			if(kind == 300){
+				archivo.println(tupla._value+"	DW	0");
+			}
+		}
 	}
 
 	private boolean isLabel(int i) {
@@ -64,33 +117,27 @@ public class GeneradorAssembler {
 			code += "ret"+'\n';
 			break;
 		case "+":
-			aux = "@aux"+auxCounter++;
-			arg2 = pila.pop();
-			arg2 = arg1.startsWith("@")?arg2: "_"+arg2;
-			arg1 = pila.pop();
-			arg1 = arg2.startsWith("@")?arg1: "_"+arg1;
+			aux = generarAux();
+			arg2 = procArgument(pila.pop());
+			arg1 = procArgument(pila.pop());
 			code += "mov ax, "+arg1+'\n';
 			code += "add ax, "+arg2+'\n';
 			code += "mov "+aux+", ax"+'\n';
 			pila.push(aux);
 			break;
 		case "-":
-			aux = "@aux"+auxCounter++;
-			arg2 = pila.pop();
-			arg2 = arg1.startsWith("@")?arg2: "_"+arg2;
-			arg1 = pila.pop();
-			arg1 = arg2.startsWith("@")?arg1: "_"+arg1;
+			aux = generarAux();
+			arg2 = procArgument(pila.pop());
+			arg1 = procArgument(pila.pop());
 			code += "mov ax, "+arg1+'\n';
 			code += "sub ax, "+arg2+'\n';
 			code += "mov "+aux+", ax"+'\n';
 			pila.push(aux);
 			break;
 		case "*":
-			aux = "@aux"+auxCounter++;
-			arg2 = this.getNextOperand();
-			arg2 = arg1.startsWith("@")?arg2: "_"+arg2;
-			arg1 = pila.pop();
-			arg1 = arg2.startsWith("@")?arg1: "_"+arg1;
+			aux = generarAux();
+			arg2 = procArgument(pila.pop());
+			arg1 = procArgument(pila.pop());
 			code += "mov ax, "+arg1+'\n';
 			code += "mov dx, "+arg2+'\n';
 			code += "mul dx "+'\n';
@@ -98,11 +145,9 @@ public class GeneradorAssembler {
 			pila.push(aux);
 			break;
 		case "/":
-			aux = "@aux"+auxCounter++;
-			arg2 = pila.pop();
-			arg2 = arg1.startsWith("@")?arg2: "_"+arg2;
-			arg1 = pila.pop();
-			arg1 = arg2.startsWith("@")?arg1: "_"+arg1;
+			aux = generarAux();
+			arg2 = procArgument(pila.pop());
+			arg1 = procArgument(pila.pop());
 			code += "mov ax, "+arg1+'\n';
 			code += "mov dx, "+arg2+'\n';
 			code += "div dx "+'\n';
@@ -110,64 +155,51 @@ public class GeneradorAssembler {
 			pila.push(aux);
 			break;
 		case "=":
-			arg2 = pila.pop();
-			arg2 = arg1.startsWith("@")?arg2: "_"+arg2;
-			arg1 = pila.pop();
-			arg1 = arg2.startsWith("@")?arg1: "_"+arg1;
+			arg2 = procArgument(pila.pop());
+			arg1 = procArgument(pila.pop());
 			code += "mov ax, "+arg2+'\n';
 			code += "mov "+arg1+", ax"+'\n';
 			break;
 		case "==":
 			this.lastCmp = op;
 			arg2 = pila.pop();
-			arg2 = arg1.startsWith("@")?arg2: "_"+arg2;
-			arg1 = pila.pop();
-			arg1 = arg2.startsWith("@")?arg1: "_"+arg1;
+			arg2 = procArgument(pila.pop());
+			arg1 = procArgument(pila.pop());
 			code += "mov ax, "+arg1+'\n';
 			code += "cmp ax,"+arg2+", ax"+'\n';
 			break;
 		case "!=":
 			this.lastCmp = op;
-			arg2 = pila.pop();
-			arg2 = arg1.startsWith("@")?arg2: "_"+arg2;
-			arg1 = pila.pop();
-			arg1 = arg2.startsWith("@")?arg1: "_"+arg1;
+			arg2 = procArgument(pila.pop());
+			arg1 = procArgument(pila.pop());
 			code += "mov ax, "+arg1+'\n';
 			code += "cmp ax,"+arg2+", ax"+'\n';
 			break;
 		case "<":
 			this.lastCmp = op;
-			arg2 = pila.pop();
-			arg2 = arg1.startsWith("@")?arg2: "_"+arg2;
-			arg1 = pila.pop();
-			arg1 = arg2.startsWith("@")?arg1: "_"+arg1;
+			arg2 = procArgument(pila.pop());
+			arg1 = procArgument(pila.pop());
 			code += "mov ax, "+arg1+'\n';
 			code += "cmp ax,"+arg2+'\n';
 			break;
 		case ">":
 			this.lastCmp = op;
-			arg2 = pila.pop();
-			arg2 = arg1.startsWith("@")?arg2: "_"+arg2;
-			arg1 = pila.pop();
-			arg1 = arg2.startsWith("@")?arg1: "_"+arg1;
+			arg2 = procArgument(pila.pop());
+			arg1 = procArgument(pila.pop());
 			code += "mov ax, "+arg1+'\n';
 			code += "cmp ax,"+arg2+", ax"+'\n';
 			break;
 		case "<=":
 			this.lastCmp = op;
-			arg2 = pila.pop();
-			arg2 = arg1.startsWith("@")?arg2: "_"+arg2;
-			arg1 = pila.pop();
-			arg1 = arg2.startsWith("@")?arg1: "_"+arg1;
+			arg2 = procArgument(pila.pop());
+			arg1 = procArgument(pila.pop());
 			code += "mov ax, "+arg1+'\n';
 			code += "cmp ax,"+arg2+", ax"+'\n';
 			break;
 		case ">=":
 			this.lastCmp = op; 
-			arg2 = pila.pop();
-			arg2 = arg1.startsWith("@")?arg2: "_"+arg2;
-			arg1 = pila.pop();
-			arg1 = arg2.startsWith("@")?arg1: "_"+arg1;
+			arg2 = procArgument(pila.pop());
+			arg1 = procArgument(pila.pop());
 			code += "mov ax, "+arg1+'\n';
 			code += "cmp ax,"+arg2+", ax"+'\n';
 			break;
@@ -198,7 +230,7 @@ public class GeneradorAssembler {
 			break;
 		case "CALL":
 			arg1 = pila.pop();
-			code += "call func_"+arg1;
+			code += "call func_"+arg1+'\n';
 			pila.push("$"+arg1);
 			break;
 		case ":":
@@ -206,10 +238,21 @@ public class GeneradorAssembler {
 			code += "mov $"+arg1+", 0"+'\n';
 			code += "ret"+'\n';
 			break;
+		case "MAIN":
+			onMain = true;
+			code += "label _start:"+'\n';
 		}
 		return code;
 		
 		
+	}
+
+	private String generarAux() {
+		String aux = "@aux"+auxCounter++;
+		TuplaTablaSimbolos tupla = new TuplaTablaSimbolos(aux);
+		tupla._kind = 300;
+		_tds.addTupla(tupla);
+		return aux;
 	}
 
 	private String getNextOperand() {
@@ -234,6 +277,23 @@ public class GeneradorAssembler {
 			}
 		}
 			
+	}
+	
+	private String procArgument(String arg){
+		TuplaTablaSimbolos tupla = _tds.getTupla(arg);
+		if(arg.startsWith("$"))
+			return arg;
+		if(tupla._kind == 300){
+			return arg;
+		}
+		if(tupla._kind == 257){
+			return onMain? "_" + arg : "_" + arg + "_f";
+			
+		}
+		if(tupla._kind == 263){
+			return arg;
+		}
+		return null;
 	}
 
 }

@@ -9,6 +9,7 @@ import java.util.Vector;
 import acciones.*;
 import as_Parser.Parser;
 
+import Utils.TablaSimbolo;
 import Utils.Token;
 
 public class Main {
@@ -18,15 +19,16 @@ public class Main {
 	 */
 	public static void main(String[] args) {
 		
+	
 		Parser p;
-
+		TablaSimbolo tds = new TablaSimbolo();
 		if(args.length > 0)
-			p = new Parser(args[0]);
+			p = new Parser(args[0], tds);
 		else
-			p = new Parser(); 
+			p = new Parser(tds); 
+		
 		p.run();
-		GeneradorAssembler ga = new GeneradorAssembler();
-		System.out.println(ga.generateCode(p.pila.toArray()));
+		GeneradorAssembler ga = new GeneradorAssembler(tds, args[1], p.pila.toArray());
 		p.imprimirResultados();
 
 	}
