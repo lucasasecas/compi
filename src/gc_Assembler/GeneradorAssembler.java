@@ -33,6 +33,8 @@ public class GeneradorAssembler {
 			String codigo = generateCode();
 			this.generarVariables();
 			archivo.println(codigo);
+			archivo.println("invoke ExitProcess , 0");
+			archivo.println("end start");
 		} catch(Exception e){
 			System.err.println("Imposible generar codigo assembler");
 		}
@@ -240,7 +242,7 @@ public class GeneradorAssembler {
 			break;
 		case "MAIN":
 			onMain = true;
-			code += "label _start:"+'\n';
+			code += "_start:"+'\n';
 		}
 		return code;
 		
