@@ -126,14 +126,16 @@ Sentencia: Asignacion ';' {agregarRegla("Asignacion");}
 	   ;
 	   		    						  		 
 Asignacion: AsigIzq ASIGN Expresion {
-			pila.push($2.sval);	
-						}
+				pila.push($2.sval);	
+				$$ = $1;
+			}
 	    | AsigIzq ASIGN error{guardarError("se produjo error en la asignacion");}
 	    ;
 
 AsigIzq: ID {pila.push($1.sval);
 		if(!_tds.idDeclared($1.sval, alcance))
 			guardarError("La variable '"+$1.sval+"' no ha sido declarada");
+		$$ = $1;
 	}	    
 	 ;
 	 
@@ -176,8 +178,9 @@ Factor: ID {
 
 LlamadaFn: ID '(' ')' {
 		agregarRegla("llamada a funcion");
-		pila.push($1.sval);}
+		pila.push($1.sval);
 		pila.push("CALL");
+		}
 	   | ID '(' error{guardarError("falta el caracter de cierre ')'. Recuerde que las llamadas a funcion no lleva argumentos");} ';'
 	   ;	 
 
@@ -219,7 +222,11 @@ Comparacion: Expresion COMP Expresion {
 
 		
 Iteracion: CabeceraIteracion BloqueSentencias {
-			
+			pila.push(varFor);
+			pila.push(varFor);
+			pila.push("1");
+			pula.push("+");
+			pila.push("=");
 			pila.nuevoSalto("BI");
 			pila.setSaltoPrevio(pila.getLastFlag());
 			pila.setSaltoPrevio(0);
@@ -227,7 +234,7 @@ Iteracion: CabeceraIteracion BloqueSentencias {
 	   | CabeceraIteracion error ';'
 	   ;
 	   
-CabeceraIteracion: FOR '(' Asignacion ';' Comparacion2 ')' {pila.nuevoSalto("BF");}
+CabeceraIteracion: FOR '(' Asignacion ';' Comparacion2 ')' {pila.nuevoSalto("BF"); varFor = $3.sval;}
 		     | FOR '(' Asignacion ';' error ')'
 		     ;
 			
@@ -257,6 +264,7 @@ Vector<String> reglas;
 TablaSimbolo _tds;
 String alcance = "funcion";
 boolean pEFlag = false;
+String varFor = "";
 private int yylex(){
  yylval = new ParserVal();
  int t = an.getNextToken(yylval);
