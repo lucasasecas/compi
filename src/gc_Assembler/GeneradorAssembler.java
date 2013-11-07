@@ -3,6 +3,7 @@ package gc_Assembler;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -15,6 +16,7 @@ public class GeneradorAssembler {
 	Stack<String> pila;
 	Vector<Integer> labels;
 	int auxCounter = 0;
+	HashMap<String, String> messages = new HashMap<String, String>();
 	private String lastCmp;
 	String[] operators ={"HEADER", "MAIN",  ":",  "RETURN", "+", "-", "*", "/", "=", "<", ">", "<=", ">=", "==", "!=", "BF", "BI", "PRINT", "CALL"};
 	private boolean onMain = false;
@@ -33,6 +35,7 @@ public class GeneradorAssembler {
 			String codigo = generateCode();
 			this.generarVariables();
 			archivo.println(codigo);
+			archivo.println("label_quit:");
 			archivo.println("invoke ExitProcess , 0");
 			archivo.println("end start");
 		} catch(Exception e){
@@ -56,8 +59,13 @@ public class GeneradorAssembler {
 	}
 
 	private String generateCode(){
-		String code = ".code"+'\n'+"start:"+'\n'+"JMP _start"+'\n';
+		String code = ".code"+'\n'+"start:"+'\n';
+		code += "JMP _start"+'\n';
+		code += "label_div0Excp:"+'\n';
+		code += "invoke MessageBox, NULL, addr _error, addr _error, MB_OK"+'\n';
+		code += "JMP label_quit"+'\n';
 		this.procLabels();
+		this.procMessages();
 		int i = 0;
 		for( i=0; i<intermedio.size(); i++){
 			if(isLabel(i)){
@@ -72,29 +80,41 @@ public class GeneradorAssembler {
 		}
 		if(isLabel(i)){
 			code += "label_"+i+":"+'\n';
-		}		
+		}
+		
 		return code;
+	}
+
+	private void procMessages() {
+		String code = "";
+		int count = 0;
+		for(TuplaTablaSimbolos tupla : _tds.values())
+			if(tupla._kind == 270){
+				int c = count++;
+				messages.put(tupla._value, "_message"+c);
+			}
 	}
 
 	private void generarVariables() {
 		
 		archivo.println(".data");
-		archivo.println("_string	DW	\"empty\"");
+		int count  = 0;
 		for(TuplaTablaSimbolos tupla : _tds.values()){
 			int kind = tupla._kind;
 			if(kind == 257){
 				if(tupla._use != null){
 					if(tupla._use.equals("Variable"))
 						archivo.println("_"+tupla._value+"	DW	0");
-					if(tupla._use.equals("Punto de entrada")){
-						archivo.println("$"+tupla._value+"	DW	0");
-					}
 				}
 			}
 			if(kind == 300){
 				archivo.println(tupla._value+"	DW	0");
 			}
+			if(kind == 270){
+				archivo.println(messages.get(tupla._value)+" db \""+ tupla._value +"\"");
+			}
 		}
+		archivo.println("_error db \"No se puede dividir por cero\"");
 	}
 
 	private boolean isLabel(int i) {
@@ -113,9 +133,9 @@ public class GeneradorAssembler {
 			code += "func_"+arg1+":"+'\n';
 			break;
 		case "RETURN":
-			arg1 = pila.pop();
+			arg1 = procArgument(pila.pop());
 			arg2 = pila.lastElement();
-			code += "mov $"+arg2+", "+arg1+'\n';
+			code += "mov ax, "+arg1+'\n';
 			code += "ret"+'\n';
 			break;
 		case "+":
@@ -150,8 +170,11 @@ public class GeneradorAssembler {
 			aux = generarAux();
 			arg2 = procArgument(pila.pop());
 			arg1 = procArgument(pila.pop());
+			code += "mov dx, 0"+'\n';
 			code += "mov ax, "+arg1+'\n';
 			code += "mov dx, "+arg2+'\n';
+			code += "cmp ax, 0"+'\n';
+			code +=  "JNE label_div0Excp"+'\n';
 			code += "div dx "+'\n';
 			code += "mov "+aux+", ax"+'\n';
 			pila.push(aux);
@@ -164,18 +187,17 @@ public class GeneradorAssembler {
 			break;
 		case "==":
 			this.lastCmp = op;
-			arg2 = pila.pop();
 			arg2 = procArgument(pila.pop());
 			arg1 = procArgument(pila.pop());
 			code += "mov ax, "+arg1+'\n';
-			code += "cmp ax,"+arg2+", ax"+'\n';
+			code += "cmp ax,"+arg2+'\n';
 			break;
 		case "!=":
 			this.lastCmp = op;
 			arg2 = procArgument(pila.pop());
 			arg1 = procArgument(pila.pop());
 			code += "mov ax, "+arg1+'\n';
-			code += "cmp ax,"+arg2+", ax"+'\n';
+			code += "cmp ax,"+arg2+'\n';
 			break;
 		case "<":
 			this.lastCmp = op;
@@ -189,21 +211,21 @@ public class GeneradorAssembler {
 			arg2 = procArgument(pila.pop());
 			arg1 = procArgument(pila.pop());
 			code += "mov ax, "+arg1+'\n';
-			code += "cmp ax,"+arg2+", ax"+'\n';
+			code += "cmp ax,"+arg2+'\n';
 			break;
 		case "<=":
 			this.lastCmp = op;
 			arg2 = procArgument(pila.pop());
 			arg1 = procArgument(pila.pop());
 			code += "mov ax, "+arg1+'\n';
-			code += "cmp ax,"+arg2+", ax"+'\n';
+			code += "cmp ax,"+arg2+'\n';
 			break;
 		case ">=":
 			this.lastCmp = op; 
 			arg2 = procArgument(pila.pop());
 			arg1 = procArgument(pila.pop());
 			code += "mov ax, "+arg1+'\n';
-			code += "cmp ax,"+arg2+", ax"+'\n';
+			code += "cmp ax,"+arg2+'\n';
 			break;
 		case "BF":
 			arg1 = pila.pop();
@@ -226,18 +248,17 @@ public class GeneradorAssembler {
 			code += "jmp label_" + arg1+'\n';
 			break;
 		case "PRINT":
-			arg1 = pila.pop();
-			code += "mov _string, \""+arg1+"\""+'\n';
-			code += "invoke MessageBox, NULL, addr _string, addr _title, MB_OK"+'\n';
+			arg1 = procArgument(pila.pop());
+			code += "invoke MessageBox, NULL, addr "+arg1+", addr "+arg1+", MB_OK"+'\n';
 			break;
 		case "CALL":
 			arg1 = pila.pop();
 			code += "call func_"+arg1+'\n';
-			pila.push("$"+arg1);
+			pila.push("ax");
 			break;
 		case ":":
 			arg1 = pila.pop();
-			code += "mov $"+arg1+", 0"+'\n';
+			code += "mov ax, 0"+'\n';
 			code += "ret"+'\n';
 			break;
 		case "MAIN":
@@ -257,17 +278,6 @@ public class GeneradorAssembler {
 		return aux;
 	}
 
-	private String getNextOperand() {
-		String operand = pila.pop();
-		
-		return null;
-	}
-
-	private int getCountOp(String op) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	
 	private void procLabels(){
 		for(int i = 0; i<intermedio.size(); i++){
 			String l = intermedio.get(i);
@@ -282,19 +292,21 @@ public class GeneradorAssembler {
 	}
 	
 	private String procArgument(String arg){
-		TuplaTablaSimbolos tupla = _tds.getTupla(arg);
-		if(arg.startsWith("$"))
+		if(arg.equals("ax")){
 			return arg;
-		if(tupla._kind == 300){
+		}
+		TuplaTablaSimbolos tupla = _tds.getTupla(arg);
+		if(tupla._kind == 300 || tupla._kind == 263){
 			return arg;
 		}
 		if(tupla._kind == 257){
-			return onMain? "_" + arg : "_" + arg + "_f";
-			
+			return onMain? "_" + arg : "_" + arg + "_f";	
 		}
-		if(tupla._kind == 263){
-			return arg;
+		if(tupla._kind == 270){
+			return messages.get(tupla._value);
 		}
+		
+		
 		return null;
 	}
 

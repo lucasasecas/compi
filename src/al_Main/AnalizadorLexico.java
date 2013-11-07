@@ -401,7 +401,7 @@ public class AnalizadorLexico {
 		int state = 0; 
 		int preState = state;
 		_token.kind = 0;
-		while(state != FINAL && !eof()){	
+		while(state != FINAL ){	
 			_actualChar = _reader.getNextChar();
 			char a = (char) _actualChar;
 			preState = state;

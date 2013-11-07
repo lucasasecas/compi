@@ -28,7 +28,12 @@ public class Main {
 			p = new Parser(tds); 
 		
 		p.run();
-		GeneradorAssembler ga = new GeneradorAssembler(tds, args[1], p.pila.toArray());
+		GeneradorAssembler ga ;
+		if(args.length == 0){
+			ga = new GeneradorAssembler(tds, "sources/sourse.asm", p.pila.toArray());
+		}
+		else
+			ga = new GeneradorAssembler(tds, args[1], p.pila.toArray());
 		p.imprimirResultados();
 
 	}

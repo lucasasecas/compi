@@ -16,7 +16,7 @@
 
 
 
-//#line 2 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 2 "G.y"
 package as_Parser;
 import java.util.Stack;
 import java.io.*;
@@ -459,7 +459,7 @@ final static String yyrule[] = {
 "SalidaPantalla : PRINT '(' STR error $$18 ';'",
 };
 
-//#line 250 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 258 "G.y"
 
 public Pila pila;
 Vector<Vector<String>> lista;
@@ -469,6 +469,7 @@ Vector<String> reglas;
 TablaSimbolo _tds;
 String alcance = "funcion";
 boolean pEFlag = false;
+String varFor = "";
 private int yylex(){
  yylval = new ParserVal();
  int t = an.getNextToken(yylval);
@@ -577,7 +578,7 @@ public void getErroresLexicos() {
 	
 	an.printErrors();
 }
-//#line 509 "Parser.java"
+//#line 510 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -732,18 +733,18 @@ boolean doaction;
       {
 //########## USER-SUPPLIED ACTIONS ##########
 case 1:
-//#line 32 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 32 "G.y"
 {
 					alcance = "Main";
 					pila.push("MAIN");
 					}
 break;
 case 3:
-//#line 36 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 36 "G.y"
 {guardarError("error sintactico no identificado");}
 break;
 case 6:
-//#line 43 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 43 "G.y"
 {
 			for(ParserVal a : val_peek(0).list){
 				if(_tds.idDeclared(a.sval, "Main"))
@@ -754,7 +755,7 @@ case 6:
 		}
 break;
 case 8:
-//#line 54 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 54 "G.y"
 {
 				for(ParserVal a : val_peek(1).list){
 	  				TuplaTablaSimbolos tupla = _tds.getTupla(a.sval);
@@ -765,39 +766,39 @@ case 8:
 				agregarRegla("declaracion de variables");}
 break;
 case 9:
-//#line 64 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 64 "G.y"
 {yyval = val_peek(0);}
 break;
 case 10:
-//#line 67 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 67 "G.y"
 {val_peek(2).addToList(val_peek(0)); yyval = val_peek(2);}
 break;
 case 11:
-//#line 68 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 68 "G.y"
 {yyval.addToList(val_peek(0));}
 break;
 case 12:
-//#line 71 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 71 "G.y"
 {setPEFlag(); agregarRegla("Declaracion de funcion");alcance = "Main";}
 break;
 case 13:
-//#line 72 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 72 "G.y"
 {guardarError("el cuerpo de la funcion esta mal definido");}
 break;
 case 15:
-//#line 73 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 73 "G.y"
 {guardarError("falta el begin");}
 break;
 case 18:
-//#line 78 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 78 "G.y"
 {guardarError("error en una de las instancias de la funcion");}
 break;
 case 19:
-//#line 79 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 79 "G.y"
 {guardarError("error en las declaraciones de funcion");}
 break;
 case 21:
-//#line 82 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 82 "G.y"
 {
 				for(ParserVal a : val_peek(0).list){
 					if(_tds.idDeclared(a.sval, "funcion"))
@@ -807,7 +808,7 @@ case 21:
 			  }
 break;
 case 27:
-//#line 102 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 102 "G.y"
 {
 			setPEFlag();
 			pila.push(val_peek(1).sval);
@@ -820,88 +821,90 @@ case 27:
 		}
 break;
 case 30:
-//#line 116 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 116 "G.y"
 {guardarError("Sentencia mal declarada o invalida");}
 break;
 case 32:
-//#line 119 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 119 "G.y"
 {agregarRegla("Asignacion");}
 break;
 case 33:
-//#line 120 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 120 "G.y"
 {agregarRegla("Sentencia If");}
 break;
 case 34:
-//#line 121 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 121 "G.y"
 {agregarRegla("Iteracion For");}
 break;
 case 35:
-//#line 122 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 122 "G.y"
 {agregarRegla("Salida por pantalla Print");}
 break;
 case 38:
-//#line 128 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 128 "G.y"
 {
-			pila.push(val_peek(1).sval);	
-						}
+				pila.push(val_peek(1).sval);	
+				yyval = val_peek(2);
+			}
 break;
 case 39:
-//#line 131 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 132 "G.y"
 {guardarError("se produjo error en la asignacion");}
 break;
 case 40:
-//#line 134 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 135 "G.y"
 {pila.push(val_peek(0).sval);
 		if(!_tds.idDeclared(val_peek(0).sval, alcance))
 			guardarError("La variable '"+val_peek(0).sval+"' no ha sido declarada");
+		yyval = val_peek(0);
 	}
 break;
 case 41:
-//#line 140 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 142 "G.y"
 {pila.push("RETURN");}
 break;
 case 42:
-//#line 141 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 143 "G.y"
 {guardarError("sentencia return mal definida");}
 break;
 case 44:
-//#line 144 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 146 "G.y"
 {
 			pila.push('+');
 		}
 break;
 case 45:
-//#line 147 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 149 "G.y"
 {
 	   		pila.push('-');
    		}
 break;
 case 47:
-//#line 151 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 153 "G.y"
 {guardarError("Expresion mal definida");}
 break;
 case 49:
-//#line 154 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 156 "G.y"
 {
 		pila.push('*');
 	   }
 break;
 case 50:
-//#line 157 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 159 "G.y"
 {
 	 	pila.push('/');
 	 	}
 break;
 case 52:
-//#line 161 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 163 "G.y"
 {guardarError("termino mal definico");}
 break;
 case 54:
-//#line 162 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 164 "G.y"
 {guardarError("termino mal definido");}
 break;
 case 56:
-//#line 165 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 167 "G.y"
 {
 		yyval = val_peek(0);
 		pila.push(val_peek(0).sval);
@@ -910,109 +913,111 @@ case 56:
 	}
 break;
 case 57:
-//#line 171 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 173 "G.y"
 {
 		yyval = val_peek(0);
 		pila.push(val_peek(0).sval);}
 break;
-case 58:
-//#line 174 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
-{pila.push("CALL");}
-break;
 case 59:
-//#line 177 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 179 "G.y"
 {
 		agregarRegla("llamada a funcion");
-		pila.push(val_peek(2).sval);}
+		pila.push(val_peek(2).sval);
+		pila.push("CALL");
+		}
 break;
 case 60:
-//#line 180 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 184 "G.y"
 {guardarError("falta el caracter de cierre ')'. Recuerde que las llamadas a funcion no lleva argumentos");}
 break;
 case 62:
-//#line 184 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 188 "G.y"
 {
 	    	pila.setSaltoPrevio(2);
 	    	pila.nuevoSalto("BI");
 	    }
 break;
 case 63:
-//#line 188 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 192 "G.y"
 {pila.setSaltoPrevio(0);}
 break;
 case 64:
-//#line 189 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 193 "G.y"
 {pila.setSaltoPrevio(0);}
 break;
 case 65:
-//#line 193 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 197 "G.y"
 {
 	    	pila.nuevoSalto("BF");
 	    }
 break;
 case 66:
-//#line 196 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 200 "G.y"
 {guardarError("se produjo un error en la comparacion");}
 break;
 case 68:
-//#line 197 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 201 "G.y"
 {guardarError("no se encontro la palabra reservada \"then\"");}
 break;
 case 74:
-//#line 208 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 212 "G.y"
 {guardarError("error sintactico dentro del bloque de codigo");}
 break;
 case 76:
-//#line 209 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 213 "G.y"
 {guardarError("no se encontro el cierre de bloque de codigo \"end\"");}
 break;
 case 78:
-//#line 214 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 218 "G.y"
 {
 			pila.push(val_peek(1).sval);
 		}
 break;
 case 79:
-//#line 220 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 224 "G.y"
 {
-			
+			pila.push(varFor);
+			pila.push(varFor);
+			pila.push("1");
+			pila.push("+");
+			pila.push("=");
 			pila.nuevoSalto("BI");
 			pila.setSaltoPrevio(pila.getLastFlag());
 			pila.setSaltoPrevio(0);
 		}
 break;
 case 81:
-//#line 229 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
-{pila.nuevoSalto("BF");}
+//#line 237 "G.y"
+{pila.nuevoSalto("BF"); varFor = val_peek(3).sval;}
 break;
 case 83:
-//#line 233 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 241 "G.y"
 {yyval = val_peek(2); pila.push(val_peek(1).sval);}
 break;
 case 84:
-//#line 234 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 242 "G.y"
 {guardarError("del lado derecho de la comparacion debe ir una expresion");}
 break;
 case 87:
-//#line 238 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 246 "G.y"
 {yyval = val_peek(0); pila.setFlag(); pila.push(val_peek(0).sval);
 			if(!_tds.idDeclared(val_peek(0).sval, alcance))
 				guardarError("La variable '"+val_peek(0).sval+"' no ha sido declarada");	
 		}
 break;
 case 88:
-//#line 244 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 252 "G.y"
 {pila.push(val_peek(1).sval); pila.push("PRINT");}
 break;
 case 89:
-//#line 245 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 253 "G.y"
 {guardarError("falta cadena de caracteres o se escrio mal");}
 break;
 case 91:
-//#line 246 "/home/lucas/workspace/Compilador2/sources/Gramatica.y"
+//#line 254 "G.y"
 {guardarError("la sentencia print se debe cerrar con el caracter especial ')'");}
 break;
-//#line 939 "Parser.java"
+//#line 944 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

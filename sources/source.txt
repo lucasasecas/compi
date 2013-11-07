@@ -1,16 +1,13 @@
-uint a,b, t, h;
+uint a, b;
 
-function
+b = 0;
+for(a=0; a<=12)
 begin
-uint a, c, d;
- c:
- 		d=34;
-         c=d;
- end
-a=b+c;
-
-if(a<b)then
-        a=c();
-        
-for(a=t; t<h)
-        print('entro al for');
+	a=a+2;
+	b = b + 1;
+	
+end
+if(b==5)then
+  print('si');
+ else
+ 	print('no');

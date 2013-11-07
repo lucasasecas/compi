@@ -171,12 +171,13 @@ Factor: ID {
 	| CTE {
 		$$ = $1;
 		pila.push($1.sval);}
-	| LlamadaFn {pila.push("CALL");}
+	| LlamadaFn 
 	;
 
 LlamadaFn: ID '(' ')' {
 		agregarRegla("llamada a funcion");
 		pila.push($1.sval);}
+		pila.push("CALL");
 	   | ID '(' error{guardarError("falta el caracter de cierre ')'. Recuerde que las llamadas a funcion no lleva argumentos");} ';'
 	   ;	 
 
