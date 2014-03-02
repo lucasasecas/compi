@@ -31,24 +31,34 @@ import Utils.Pila;
 
 Programa: Declaraciones {
 					alcance = "Main";
-					pila.push("MAIN");
+					push("MAIN");
 					} Sentencias
-	  | error {guardarError("error sintactico no identificado");} 
+	  | error {guardarError("Error en delcaracion");} Sentencias
 	  ;
 
-Declaraciones: Declaraciones Declaracion 
-		| Declaracion
+Declaraciones: DeclaracionesVariables DeclaracionesFunciones
+		 | DeclaracionesVariables
+		 
+		 | DeclaracionesFunciones DeclaracionesVariables error {guardarError("Las declaraciones de variables estan despues de las declaraciones de funciones");} 
+		 | DeclaracionesFunciones error{guardarError("No se encontro declaraciones de variables ");}	
 		;
 
-Declaracion: DeclaracionVariables {
-			for(ParserVal a : $1.list){
-				if(_tds.idDeclared(a.sval, "Main"))
-					guardarError("El identificador "+a.sval+" ya ha sido declarado");
+DeclaracionesVariables: DeclaracionesVariables DeclaracionVariables {
+			for(ParserVal a : $2.list){
+				if(_tds.isDeclared(a.sval, "Main"))
+					guardarErrorSem("El identificador "+a.sval+" ya ha sido declarado");
 				TuplaTablaSimbolos tupla = _tds.getTupla(a.sval);
 				tupla.set_scope("Main");
 			}
 		}
-		| DeclaracionFunciones
+		| DeclaracionVariables {
+			for(ParserVal a : $1.list){
+				if(_tds.isDeclared(a.sval, "Main"))
+					guardarErrorSem("El identificador "+a.sval+" ya ha sido declarado");
+				TuplaTablaSimbolos tupla = _tds.getTupla(a.sval);
+				tupla.set_scope("Main");
+			}
+		}
 		;
 
 DeclaracionVariables: Tipo ListaVariables ';' {
@@ -58,7 +68,7 @@ DeclaracionVariables: Tipo ListaVariables ';' {
 	  				tupla.set_use("Variable");
 				}
 				$$ = $2;				  
-				agregarRegla("declaracion de variables");} 
+				agregarRegla("declaracion de variables");} 	  
 			  ;
 			  
 Tipo: UINT {$$ = $1;}
@@ -67,7 +77,10 @@ Tipo: UINT {$$ = $1;}
 ListaVariables: ListaVariables ',' ID {$1.addToList($3); $$ = $1;} 
 		  | ID {$$.addToList($1);}
 		  ;
-		  
+DeclaracionesFunciones: DeclaracionesFunciones DeclaracionFunciones
+			    | DeclaracionFunciones
+			    ;
+			    
 DeclaracionFunciones: FUNCTION BEGIN CuerpoFuncion END {setPEFlag(); agregarRegla("Declaracion de funcion");alcance = "Main";}
 			  | FUNCTION BEGIN error{guardarError("el cuerpo de la funcion esta mal definido");} END
 			  | FUNCTION error {guardarError("falta el begin");} END
@@ -79,10 +92,17 @@ CuerpoFuncion: DeclaracionesFuncion InstanciasFuncion
 		 | error{guardarError("error en las declaraciones de funcion");} InstanciasFuncion
 		 ;
 
-DeclaracionesFuncion: DeclaracionVariables {
+DeclaracionesFuncion:DeclaracionesFuncion DeclaracionVariables {
+				for(ParserVal a : $2.list){
+					if(_tds.isDeclared(a.sval, "funcion"))
+						guardarErrorSem("El identificador "+a.sval+" ya ha sido declarado");
+					_tds.changeScope(a.sval);
+				}
+			  }
+			  | DeclaracionVariables {	
 				for(ParserVal a : $1.list){
-					if(_tds.idDeclared(a.sval, "funcion"))
-						guardarError("El identificador "+a.sval+" ya ha sido declarado");
+					if(_tds.isDeclared(a.sval, "funcion"))
+						guardarErrorSem("El identificador "+a.sval+" ya ha sido declarado");
 					_tds.changeScope(a.sval);
 				}
 			  }
@@ -101,11 +121,11 @@ PuntoEntrada: CabeceraPE Sentencia
 
 CabeceraPE: ID ':'  {
 			setPEFlag();
-			pila.push($1.sval);
-			pila.push("HEADER");
-			if(_tds.idDeclared($1.sval, "Main"))
-				guardarError("El identificador "+$1.sval+" ya ha sido declarado");
+			push($1.sval);
+			push("HEADER");
 			TuplaTablaSimbolos tupla = _tds.getTupla($1.sval);
+			if(_tds.isDeclared($1.sval, "Main"))
+					guardarErrorSem("El identificador "+$1.sval+" ya ha sido declarado");
 			tupla.set_use("Punto de entrada");
 			tupla._scope = "Main";
 		}
@@ -121,43 +141,41 @@ Sentencia: Asignacion ';' {agregarRegla("Asignacion");}
 	   | Iteracion {agregarRegla("Iteracion For");}
 	   | SalidaPantalla ';' {agregarRegla("Salida por pantalla Print");}
 	   | Return ';'
-	   | LlamadaFn ';' 
-	   
+	   | LlamadaFn ';'  
 	   ;
 	   		    						  		 
 Asignacion: AsigIzq ASIGN Expresion {
-				pila.push($2.sval);	
+				push($2.sval);	
 				$$ = $1;
 			}
 	    | AsigIzq ASIGN error{guardarError("se produjo error en la asignacion");}
 	    ;
 
-AsigIzq: ID {pila.push($1.sval);
-		if(!_tds.idDeclared($1.sval, alcance))
-			guardarError("La variable '"+$1.sval+"' no ha sido declarada");
+AsigIzq: ID {push($1.sval);
+		verificarDeclaracion($1.sval);
 		$$ = $1;
 	}	    
 	 ;
 	 
-Return: RETURN '(' Expresion ')' {pila.push("RETURN");}
+Return: RETURN '(' Expresion ')' {push("RETURN");}
 	| RETURN '(' error{guardarError("sentencia return mal definida");} ';'
 	;
 	    
 Expresion: Expresion '+' Termino {
-			pila.push('+');
+			push('+');
 		}
 	   | Expresion '-' Termino {
-	   		pila.push('-');
+	   		push('-');
    		}
 	   | Termino
 	   | Expresion error {guardarError("Expresion mal definida");}';'
 	   ;
 
 Termino: Termino '*' Factor {
-		pila.push('*');
+		push('*');
 	   }
 	 | Termino '/' Factor {
-	 	pila.push('/');
+	 	push('/');
 	 	}
 	 | Factor 
 	 | Termino '*' error{guardarError("termino mal definico");} ';'
@@ -166,20 +184,19 @@ Termino: Termino '*' Factor {
 
 Factor: ID {
 		$$ = $1;
-		pila.push($1.sval);
-		if(!_tds.idDeclared($1.sval, alcance))
-			guardarError("La variable '"+$1.sval+"' no ha sido declarada");
+		push($1.sval);
+		verificarDeclaracion($1.sval);
 	}
 	| CTE {
 		$$ = $1;
-		pila.push($1.sval);}
+		push($1.sval);}
 	| LlamadaFn 
 	;
 
 LlamadaFn: ID '(' ')' {
 		agregarRegla("llamada a funcion");
-		pila.push($1.sval);
-		pila.push("CALL");
+		push($1.sval);
+		push("CALL");
 		}
 	   | ID '(' error{guardarError("falta el caracter de cierre ')'. Recuerde que las llamadas a funcion no lleva argumentos");} ';'
 	   ;	 
@@ -216,17 +233,17 @@ BloqueSentencias: Sentencia
 
 	    
 Comparacion: Expresion COMP Expresion {
-			pila.push($2.sval);
+			push($2.sval);
 		}
 		;
 
 		
 Iteracion: CabeceraIteracion BloqueSentencias {
-			pila.push(varFor);
-			pila.push(varFor);
-			pila.push("1");
-			pula.push("+");
-			pila.push("=");
+			push(varFor);
+			push(varFor);
+			push("1");
+			push("+");
+			push("=");
 			pila.nuevoSalto("BI");
 			pila.setSaltoPrevio(pila.getLastFlag());
 			pila.setSaltoPrevio(0);
@@ -238,18 +255,17 @@ CabeceraIteracion: FOR '(' Asignacion ';' Comparacion2 ')' {pila.nuevoSalto("BF"
 		     | FOR '(' Asignacion ';' error ')'
 		     ;
 			
-Comparacion2: Comp2Izq COMP Expresion {$$ = $1; pila.push($2.sval);}
+Comparacion2: Comp2Izq COMP Expresion {$$ = $1; push($2.sval);}
 		| Comp2Izq COMP error{guardarError("del lado derecho de la comparacion debe ir una expresion");} ';'
 		| Comp2Izq error ';'
 		;
 
-Comp2Izq: ID {$$ = $1; pila.setFlag(); pila.push($1.sval);
-			if(!_tds.idDeclared($1.sval, alcance))
-				guardarError("La variable '"+$1.sval+"' no ha sido declarada");	
+Comp2Izq: ID {$$ = $1; pila.setFlag(); push($1.sval);
+			verificarDeclaracion($1.sval);
 		}		
 ;
 		 			 	   
-SalidaPantalla: PRINT '(' STR ')' {pila.push($3.sval); pila.push("PRINT");}
+SalidaPantalla: PRINT '(' STR ')' {push($3.sval); push("PRINT");}
 		  | PRINT '(' error{guardarError("falta cadena de caracteres o se escrio mal");} ')'
 		  | PRINT '(' STR error{guardarError("la sentencia print se debe cerrar con el caracter especial ')'");} ';'
 		  ;
@@ -260,11 +276,14 @@ public Pila pila;
 Vector<Vector<String>> lista;
 AnalizadorLexico an; 
 Vector<String> errores;
+Vector<String> erroresSem;
+Vector<String> intermedio;
 Vector<String> reglas;
 TablaSimbolo _tds;
 String alcance = "funcion";
 boolean pEFlag = false;
 String varFor = "";
+
 private int yylex(){
  yylval = new ParserVal();
  int t = an.getNextToken(yylval);
@@ -283,6 +302,8 @@ public Parser(TablaSimbolo tds){
 	lista = new Vector<Vector<String>>();
 	errores = new Vector<String>();
 	reglas = new Vector<String>();
+	intermedio = new Vector<String>();
+	erroresSem = new Vector<String>();
 	pila = new Pila();
 //	yydebug = true;
 }
@@ -316,6 +337,13 @@ private void guardarError(String error){
 	errores.add("Error sintactico (Linea "+yylval.row+"): "+error);
 	
 }
+
+private void guardarErrorSem(String error){
+	erroresSem.add("Error sintactico (Linea "+yylval.row+"): "+error);
+	
+}
+
+
 private void imprimirTokens(){
 	System.out.println("LISTA DE TOKENS ");
 	for(int i = 0; i<lista.size();i++)
@@ -342,9 +370,18 @@ public void imprimirErroresSintacticos(){
 	System.out.println();
 }
 
+public void imprimirErroresSemanticos(){
+	System.out.println("ERRORES SEMANTICOS");
+	for(int i = 0; i<errores.size();i++)
+		System.out.println(erroresSem.get(i));
+	System.out.println();
+	System.out.println();
+}
+
+
 public void setPEFlag(){
 	if(pEFlag)
-		pila.push(":");
+		push(":");
 	else
 		pEFlag = true;
 }
@@ -362,14 +399,41 @@ public void imprimirTablaDeSimbolos() {
 	
 }
 public void imprimirResultados(){
-	System.out.println(pila.toString());
+	
 	this.imprimirTokens();
-	this.imprimirReglas();
+	this.imprimirCodigoIntermedio();
 	this.imprimirTablaDeSimbolos();
 	this.imprimirErroresLexicos();
 	this.imprimirErroresSintacticos();
+	this.imprimirErroresSemanticos();
 }
 public void getErroresLexicos() {
 	
 	an.printErrors();
+}
+
+public boolean hayError(){
+	return an.hayError() ||  errores.size() > 0;
+}
+
+public void verificarDeclaracion(String val){
+	if(alcance.equals("funcion")){	
+		if(!_tds.isDeclared(val, "funcion") && !_tds.isDeclared(val, "Main"))
+			guardarErrorSem("La variable '"+val+"' no ha sido declarada");
+	}
+	else
+		if(!_tds.isDeclared(val, "Main"))
+			guardarErrorSem("La variable '"+val+"' no ha sido declarada");
+		
+	
+}
+
+public void push(String a ){
+	pila.push(a);
+	intermedio.add(new String("Linea "+yylval.row+": "+a));
+}
+
+public void push(char a ){
+	pila.push(a);
+	intermedio.add(new String("Linea "+yylval.row+": "+a));
 }

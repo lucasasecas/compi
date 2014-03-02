@@ -15,21 +15,22 @@ public class TablaSimbolo {
 				_tabla.put(tts.get_value(),tts);
 	}
 	
-	public boolean idDeclared(String val, String scope){
+	public boolean isDeclared(String val, String scope){
 		TuplaTablaSimbolos tupla = null;
 		if(scope.equals("Main")){
 			tupla = getTupla(val);
-			if(tupla._scope == null)
-				return false;
+
 		}
 		else
 			tupla = getTupla(val+"_f");
+		if(tupla != null && tupla._scope == null)
+			return false;
 		return tupla != null;
 	}
 	
 	
 	public TuplaTablaSimbolos getTupla(String clave){
-		return (TuplaTablaSimbolos) _tabla.get(clave);
+		return _tabla.get(clave);
 	}
 	
 	public void delTupla(String clave){
@@ -45,8 +46,11 @@ public class TablaSimbolo {
 			System.out.println("");
 			System.out.println("**TABLA DE SIMBOLOS**");			
 		}
-		for (TuplaTablaSimbolos e : _tabla.values()){
-			e.mostrar();
+		TuplaTablaSimbolos[] tabla = new TuplaTablaSimbolos[_tabla.values().size()];
+		tabla = _tabla.values().toArray(tabla); 
+		for (int i = 0; i<tabla.length; i++){
+			if(tabla[i] != null)
+				tabla[i].mostrar();
 		}
 	}
 	

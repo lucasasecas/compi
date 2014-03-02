@@ -2,15 +2,9 @@ package al_Main;
 
 import gc_Assembler.GeneradorAssembler;
 
-import java.io.File;
-import java.util.Vector;
-
-
-import acciones.*;
 import as_Parser.Parser;
 
 import Utils.TablaSimbolo;
-import Utils.Token;
 
 public class Main {
 
@@ -22,18 +16,17 @@ public class Main {
 	
 		Parser p;
 		TablaSimbolo tds = new TablaSimbolo();
-		if(args.length > 0)
-			p = new Parser(args[0], tds);
-		else
-			p = new Parser(tds); 
-		
+//		p = new Parser(args[0], tds);
+		p = new Parser("sources/source.txt", tds);
+			
 		p.run();
 		GeneradorAssembler ga ;
-		if(args.length == 0){
-			ga = new GeneradorAssembler(tds, "sources/sourse.asm", p.pila.toArray());
+		if(!p.hayError()){
+			ga = new GeneradorAssembler(tds, "sources/aux.txt", p.pila.toArray());
+			if(!ga.hayErrores())
+				System.out.println("Codigo assembler creado correctamente");
 		}
-		else
-			ga = new GeneradorAssembler(tds, args[1], p.pila.toArray());
+		
 		p.imprimirResultados();
 
 	}

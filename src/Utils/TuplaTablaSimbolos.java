@@ -81,9 +81,10 @@ public class TuplaTablaSimbolos {
 				break;
 		}
 				
-		System.out.println("Valor: "+_value+"; Tipo: "+t+"; Alcance: "+ _scope);
+		System.out.println("Valor: "+_value+';'+'\t'+"Tipo token: "+t+"; Alcance: "+ _scope+'\t'+"Tipo Variable: "+_type+'\t'+"Usos: "+_use);
 	}
 	
+	@Override
 	public TuplaTablaSimbolos clone(){
 		TuplaTablaSimbolos nuevaTupla = new TuplaTablaSimbolos();
 		nuevaTupla.set_kind(_kind);

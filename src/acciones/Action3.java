@@ -1,6 +1,5 @@
 package acciones;
 
-import Utils.TuplaTablaSimbolos;
 import al_Main.AnalizadorLexico;
 
 public class Action3 extends Action {
@@ -20,7 +19,7 @@ public class Action3 extends Action {
 		else{
 			if(id.length() > 15){
 				id = id.substring(0, 15);
-				_analizador.addErrorMessage("Warning: el id "+_analizador.getActualToken()+" excedio el limite de longitud permitido");
+				_analizador.addErrorMessage("Warning: el id "+_analizador.getActualToken().sval+" excedio el limite de longitud permitido");
 				_analizador.truncateLexeme(id);
 			}
 			_analizador.addTokenToTDS();

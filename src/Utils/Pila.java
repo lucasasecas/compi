@@ -71,6 +71,7 @@ public class Pila {
 		this.push(string);
 	}
 	
+	@Override
 	public String toString(){
 		return pila.toString();
 	}

@@ -1,6 +1,5 @@
 package gc_Assembler;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -111,10 +110,10 @@ public class GeneradorAssembler {
 				archivo.println(tupla._value+"	DW	0");
 			}
 			if(kind == 270){
-				archivo.println(messages.get(tupla._value)+" db \""+ tupla._value +"\"");
+				archivo.println(messages.get(tupla._value)+" db \""+ tupla._value +"\", 0");
 			}
 		}
-		archivo.println("_error db \"No se puede dividir por cero\"");
+		archivo.println("_error db \"No se puede dividir por cero\", 0");
 	}
 
 	private boolean isLabel(int i) {
@@ -172,10 +171,10 @@ public class GeneradorAssembler {
 			arg1 = procArgument(pila.pop());
 			code += "mov dx, 0"+'\n';
 			code += "mov ax, "+arg1+'\n';
-			code += "mov dx, "+arg2+'\n';
+//			code += "mov dx, "+arg1+'\n';
 			code += "cmp ax, 0"+'\n';
 			code +=  "JNE label_div0Excp"+'\n';
-			code += "div dx "+'\n';
+			code += "div "+arg2+'\n';
 			code += "mov "+aux+", ax"+'\n';
 			pila.push(aux);
 			break;
@@ -308,6 +307,11 @@ public class GeneradorAssembler {
 		
 		
 		return null;
+	}
+
+	public boolean hayErrores() {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

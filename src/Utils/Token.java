@@ -50,8 +50,6 @@
 
 package Utils;
 
-import as_Parser.ParserVal;
-
 /**
  * Clase que describe un componente l�xico
  *  
@@ -159,10 +157,12 @@ public class Token  {
 	/**
 	 * Obtiene una descripci�n del Token
 	 */
+	@Override
 	public String toString() {
 		return "[Row: "+_row+"][Kind: "+_kind+"] "+_lexeme;
 	}
 	
+	@Override
 	public Token clone(){
 		Token t = new Token(_kind, _lexeme, _row);
 		return t;

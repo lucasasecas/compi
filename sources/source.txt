@@ -1,13 +1,5 @@
-uint a, b;
+uint a,b;
 
-b = 0;
-for(a=0; a<=12)
-begin
-	a=a+2;
-	b = b + 1;
-	
-end
-if(b==5)then
-  print('si');
- else
- 	print('no');
+a = 3;
+b = 6;
+a = b / a;

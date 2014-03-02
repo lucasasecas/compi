@@ -1,6 +1,5 @@
 package al_Main;
 
-import java.awt.List;
 import java.util.Vector;
 
 import Utils.LexicalException;

@@ -1,8 +1,6 @@
 package al_Main;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Vector;
@@ -25,7 +23,6 @@ import as_Parser.ParserVal;
 import Utils.BufferedCharStream;
 import Utils.LexicalException;
 import Utils.TablaSimbolo;
-import Utils.Token;
 import Utils.TuplaTablaSimbolos;
 
 
@@ -48,6 +45,7 @@ public class AnalizadorLexico {
 	private int FOR		=269;
 	private int STR		=270;
 	private int PRINT	=271;
+	private int EOF     = 0;
 	
 	Estado[][] _matrizTransicion;
 	Pattern[] _patterns;
@@ -273,7 +271,7 @@ public class AnalizadorLexico {
  		matriz[6][1] = new Estado(-1); matriz[6][1].addAction(ac8);
  		matriz[6][2] = new Estado(-1); matriz[6][2].addAction(ac8);
  		matriz[6][3] = new Estado(-1); matriz[6][3].addAction(ac8);
- 		matriz[6][4] = new Estado(7); 
+ 		matriz[6][4] = new Estado(7); matriz[6][4].addAction(ac8);
  		matriz[6][5] = new Estado(-1); matriz[6][5].addAction(ac8);
  		matriz[6][6] = new Estado(-1); matriz[6][6].addAction(ac8);
  		matriz[6][7] = new Estado(-1); matriz[6][7].addAction(ac8);
@@ -363,9 +361,9 @@ public class AnalizadorLexico {
 	private void initMatrixTypes(){
 	
 		_types = new int[10][21];
-		for(int i = 0; i<3; i++)
-			for(int j=0; j<20; j++)
-				_types[i][j] = 0;
+		for(int i = 0; i<10; i++)
+			for(int j=0; j<21; j++)
+				_types[i][j] = -1;
 		
 		_types[0][0] = ID;
 		_types[0][1] = CTE ;
@@ -383,7 +381,7 @@ public class AnalizadorLexico {
 		_types[0][13] = ';';
 		_types[0][14] = ':';
 		_types[0][15] = STR;
-				
+		_types[0][20] = EOF;
 		_types[3][8] = COMP;
 		
 	}
@@ -406,8 +404,9 @@ public class AnalizadorLexico {
 			char a = (char) _actualChar;
 			preState = state;
 			state = transition(state);
-			int newKind = _types[preState][this.getColumn(_actualChar)];
-			if(newKind != 0)
+			int col = this.getColumn(_actualChar);
+			int newKind = _types[preState][col];
+			if(newKind != -1)
 				_token.kind = newKind;
 		}
 		
@@ -496,6 +495,10 @@ public class AnalizadorLexico {
 		tupla._kind = _token.kind;
 		_tds.addTupla(tupla);
 		
+	}
+
+	public boolean hayError() {
+		return _errors.size() > 0;
 	}
 
 }
