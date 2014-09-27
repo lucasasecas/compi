@@ -1,7 +1,13 @@
 package acciones;
 
 import al_Main.AnalizadorLexico;
-
+/**
+ * analiza identificadores
+ * <p>
+ * Si excede el limite de caracteres o es palabra reservada, ejecuta accion
+ * @author Lucas
+ *
+ */
 public class Action3 extends Action {
 
 	public Action3(AnalizadorLexico al) {
@@ -17,8 +23,8 @@ public class Action3 extends Action {
 			_analizador.setKindToken(_analizador._tpr.get(id));
 		}
 		else{
-			if(id.length() > 15){
-				id = id.substring(0, 15);
+			if(id.length() > 12){
+				id = id.substring(0, 12);
 				_analizador.addErrorMessage("Warning: el id "+_analizador.getActualToken().sval+" excedio el limite de longitud permitido");
 				_analizador.truncateLexeme(id);
 			}

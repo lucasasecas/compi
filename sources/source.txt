@@ -1,5 +1,23 @@
-uint a,b;
+'h
++ jhkhjkgjhgj'
+'lalala'
+lkj_as
+ds$lllasdskgfbkdsgfvaslgvbdskz
+ASDASD&sadfdsfs
+ughh5656iii
++-*/
+**shdfjkasg
+,
+;
+>= 
+<=
+<
+>  
+:=
+{
+}
+}(
+^
+:^=
 
-a = 3;
-b = 6;
-a = b / a;
+32766
