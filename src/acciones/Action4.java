@@ -12,7 +12,7 @@ public class Action4 extends Action {
 
 	public static double MAX = Math.pow(2, 15)-1;
 	public static double MIN = Math.pow(2, 15);
-	public static double MIN_L = -Math.pow(2, -31);
+	public static double MIN_L = Math.pow(2, 31);
 	public static double MAX_L = Math.pow(2, 31)-1;
 	public Action4(AnalizadorLexico al) {
 		super(al);
@@ -24,10 +24,15 @@ public class Action4 extends Action {
 		String lex = _analizador.getActualToken().sval;
 		int uint = Double.valueOf(lex).intValue();
 		if(uint  > MIN){
-			_analizador.addErrorMessage("constante fuera de rango", false);
+			if(uint >MIN_L)
+				_analizador.addErrorMessage("constante fuera de rango", false);
+			_analizador.addTokenToTDS();
+			_analizador.setTypeOfToken("entero_l");
 		}
 		else{
+			
 			_analizador.addTokenToTDS();
+			_analizador.setTypeOfToken("entero");
 		}
 		
 	}

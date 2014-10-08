@@ -628,4 +628,10 @@ public class AnalizadorLexico {
 		
 	}
 
+	public void setTypeOfToken(String tipo) {
+		TuplaTablaSimbolos tupla = _tds.getTupla(_token.sval);
+		tupla.setValue("tipo", tipo);
+		
+	}
+
 }

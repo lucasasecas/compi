@@ -32,6 +32,8 @@ public String sval =new String();
 public int kind = 0;
 
 public int row = 0;
+
+public int type = 0;
 /**
  * object value of this 'union'
  */

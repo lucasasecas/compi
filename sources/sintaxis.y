@@ -2,6 +2,7 @@
 	package as_Parser;
 	import java.util.Vector;
 
+	import java.util.List;
 	import unicen.compiladores.gui.ErrorManager;
 	import unicen.compiladores.gui.ParserError;
 	import unicen.compiladores.gui.Sentencia;
@@ -44,38 +45,38 @@ Declaraciones:  Declaraciones Declaracion
 	|	Declaracion
 	;
 			 
- Declaracion:	Declaracion_reg
-	|	Declaracion_var
+ Declaracion:	Declaracion_reg {addUse("registro", $1.list);}
+	|	Declaracion_var {addUse("variable", $1.list);}
 	;
 			
-Declaracion_reg:	REGISTRO Cuerpo_reg Lista_var_reg ';'
+Declaracion_reg:	REGISTRO Cuerpo_reg Lista_var_reg ';' {$$ = $3;}
 	|	REGISTRO Cuerpo_reg error {yyerror("se ha encontrado un error en la declaracion de variables del registro");}';'
 	;
 
-Lista_var_reg: Lista_var_reg ',' ID { tds.getTupla($3.sval).setValue("tipo", "registro");}
-	| ID { tds.getTupla($1.sval).setValue("es registro", true);}
+Lista_var_reg: Lista_var_reg ',' ID {$$.list.addAll($1.list); $$.list.add($3);}
+	| ID {$$.list.add($1);}
 	;
 
-Cuerpo_reg:		'{' Declaraciones_reg '}'
+Cuerpo_reg:		'{' Declaraciones_reg '}' {$$ = $2; addUse("variable interna registro", $2.list);} 
 	|	'{' Declaraciones_reg error {yyerror("no de encontro el caracter '}'"); } ';'
 	;
 		  
-Declaraciones_reg: 	Declaraciones_reg Declaracion_unit
-				 |	Declaracion_unit
+Declaraciones_reg: 	Declaraciones_reg Declaracion_unit {$$.list.addAll($1.list);$$.list.add($2);}
+				 |	Declaracion_unit {$$.list.add($1);}
 				 ;
 
-Declaracion_unit:	Tipo ID ';'
+Declaracion_unit:	Tipo ID ';' {setType($1.sval, $2.sval); $$ = $2;}
 				;
  
-Tipo:	ENTERO
-	|	ENTEROL
+Tipo:	ENTERO {$$ = $1;}
+	|	ENTEROL {$$ = $1;}
 	;
 
-Lista_var: 	Lista_var ',' ID
-		 |	ID
+Lista_var: 	Lista_var ',' ID {$$.list.addAll($1.list); $$.list.add($3);}
+		 |	ID {$$.list.add($1);}
 		 ;
 
-Declaracion_var: Tipo Lista_var ';'
+Declaracion_var: Tipo Lista_var ';' {setType($1.sval, $2.list);$$ = $2;}
 	;
 	
 Sentencias: Sentencias Sentencia
@@ -215,5 +216,26 @@ public Vector<ParserVal> getTokens() {
 	return tokens;
 }
 
+private void setType(String sval, List<ParserVal> list) {
+		for(int i=0; i<list.size(); i++){
+			setType(sval, list.get(i).sval);
+		}
+}
 
+private void setType(String tipo, String var){
+	tds.getTupla(var).setValue("tipo", tipo);
+}
+
+private void verificarRango(String a){
+}
+
+private void addUse(String use, List<ParserVal> ids){
+	for(int i=0; i<ids.size(); i++){
+		addUse(use, ids.get(i).sval);
+	}
+}
+
+private void addUse(String use, String id){
+	tds.getTupla(id).setValue("uso", use);
+}
 

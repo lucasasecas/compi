@@ -42,7 +42,8 @@ public class TDSPane extends JPanel {
 		Vector<TuplaTablaSimbolos> data = new Vector<TuplaTablaSimbolos>();
 		String[] cabeceras = {"valor",
 							  "clase",
-							  "es registro"};
+							  "tipo",
+							  "uso"};
 		int countColumns = 0;
 		
 		

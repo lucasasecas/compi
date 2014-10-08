@@ -20,14 +20,15 @@
 	package as_Parser;
 	import java.util.Vector;
 
+	import java.util.List;
 	import unicen.compiladores.gui.ErrorManager;
-import unicen.compiladores.gui.ParserError;
-import unicen.compiladores.gui.Sentencia;
-import unicen.compiladores.gui.SentenciaManager;
-import Utils.TablaSimbolo;
-import al_Main.AnalizadorLexico;
-import Utils.TuplaTablaSimbolos;
-//#line 28 "Parser.java"
+	import unicen.compiladores.gui.ParserError;
+	import unicen.compiladores.gui.Sentencia;
+	import unicen.compiladores.gui.SentenciaManager;
+	import Utils.TablaSimbolo;
+	import al_Main.AnalizadorLexico;
+	import Utils.TuplaTablaSimbolos;
+//#line 29 "Parser.java"
 
 
 
@@ -460,13 +461,14 @@ final static String yyrule[] = {
 "Salida : IMPRIMIR error $$21 ';'",
 };
 
-//#line 159 "sintaxis.y"
+//#line 160 "sintaxis.y"
 
 TablaSimbolo tds;
 AnalizadorLexico al;
 Vector<ParserVal> tokens = new Vector<ParserVal>();
 ErrorManager errorManager;
 SentenciaManager sentenciasManager;
+public static double MAX = Math.pow(2, 15)-1; 
 
 private int yylex(){
 	 yylval = new ParserVal();
@@ -477,7 +479,7 @@ private int yylex(){
 	}
 
 public Parser(TablaSimbolo tds, AnalizadorLexico al, ErrorManager errorManager, SentenciaManager sentenciasManager){
-
+    yydebug = true;
 	this.tds = tds;
 	this.al = al;
 	this.errorManager = errorManager;
@@ -495,8 +497,7 @@ public TablaSimbolo getTablaDeSimbolos() {
 
 private void setToNegative(ParserVal val_peek) {
 	TuplaTablaSimbolos tupla = tds.getTupla(val_peek.sval);
-	if(tupla!=null)
-		tupla.setValue("negativo", true);
+	tupla.setValue("negativo", true);
 	
 }
 
@@ -520,9 +521,30 @@ public Vector<ParserVal> getTokens() {
 	return tokens;
 }
 
+private void setType(String sval, List<ParserVal> list) {
+		for(int i=0; i<list.size(); i++){
+			setType(sval, list.get(i).sval);
+		}
+}
 
+private void setType(String tipo, String var){
+	tds.getTupla(var).setValue("tipo", tipo);
+}
 
-//#line 453 "Parser.java"
+private void verificarRango(String a){
+}
+
+private void addUse(String use, List<ParserVal> ids){
+	for(int i=0; i<ids.size(); i++){
+		addUse(use, ids.get(i).sval);
+	}
+}
+
+private void addUse(String use, String id){
+	tds.getTupla(id).setValue("uso", use);
+}
+
+//#line 476 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -677,154 +699,202 @@ boolean doaction;
       {
 //########## USER-SUPPLIED ACTIONS ##########
 case 2:
-//#line 40 "sintaxis.y"
+//#line 41 "sintaxis.y"
 {yyerror("Se han encontrado errores en las sentencias");}
 break;
-case 9:
+case 6:
+//#line 48 "sintaxis.y"
+{addUse("registro", val_peek(0).list);}
+break;
+case 7:
+//#line 49 "sintaxis.y"
+{addUse("variable", val_peek(0).list);}
+break;
+case 8:
 //#line 52 "sintaxis.y"
+{yyval = val_peek(1);}
+break;
+case 9:
+//#line 53 "sintaxis.y"
 {yyerror("se ha encontrado un error en la declaracion de variables del registro");}
 break;
 case 11:
-//#line 55 "sintaxis.y"
-{ tds.getTupla(val_peek(0).sval).setValue("es registro", true);}
+//#line 56 "sintaxis.y"
+{yyval.list.addAll(val_peek(2).list); yyval.list.add(val_peek(0));}
 break;
 case 12:
-//#line 56 "sintaxis.y"
-{ tds.getTupla(val_peek(0).sval).setValue("es registro", true);}
+//#line 57 "sintaxis.y"
+{yyval.list.add(val_peek(0));}
+break;
+case 13:
+//#line 60 "sintaxis.y"
+{yyval = val_peek(1); addUse("variable interna registro", val_peek(1).list);}
 break;
 case 14:
-//#line 60 "sintaxis.y"
+//#line 61 "sintaxis.y"
 {yyerror("no de encontro el caracter '}'"); }
 break;
+case 16:
+//#line 64 "sintaxis.y"
+{yyval.list.addAll(val_peek(1).list);yyval.list.add(val_peek(0));}
+break;
+case 17:
+//#line 65 "sintaxis.y"
+{yyval.list.add(val_peek(0));}
+break;
+case 18:
+//#line 68 "sintaxis.y"
+{setType(val_peek(2).sval, val_peek(1).sval); yyval = val_peek(1);}
+break;
+case 19:
+//#line 71 "sintaxis.y"
+{yyval = val_peek(0);}
+break;
+case 20:
+//#line 72 "sintaxis.y"
+{yyval = val_peek(0);}
+break;
+case 21:
+//#line 75 "sintaxis.y"
+{yyval.list.addAll(val_peek(2).list); yyval.list.add(val_peek(0));}
+break;
+case 22:
+//#line 76 "sintaxis.y"
+{yyval.list.add(val_peek(0));}
+break;
+case 23:
+//#line 79 "sintaxis.y"
+{setType(val_peek(2).sval, val_peek(1).list);yyval = val_peek(1);}
+break;
 case 26:
-//#line 85 "sintaxis.y"
+//#line 86 "sintaxis.y"
 {nuevaSentencia(val_peek(0),"Asignacion");}
 break;
 case 27:
-//#line 86 "sintaxis.y"
+//#line 87 "sintaxis.y"
 {nuevaSentencia(val_peek(0),"Sentencia 'si'");}
 break;
 case 28:
-//#line 87 "sintaxis.y"
+//#line 88 "sintaxis.y"
 {nuevaSentencia(val_peek(0),"sentencia 'mientras'");}
 break;
 case 29:
-//#line 88 "sintaxis.y"
+//#line 89 "sintaxis.y"
 {nuevaSentencia(val_peek(0),"Sentencia 'imprimir'");}
 break;
 case 30:
-//#line 90 "sintaxis.y"
+//#line 91 "sintaxis.y"
 {yyval = val_peek(2);}
 break;
 case 31:
-//#line 91 "sintaxis.y"
+//#line 92 "sintaxis.y"
 {yyerror("Sentencia debe finalizar con caracter ';'");}
 break;
 case 33:
-//#line 92 "sintaxis.y"
+//#line 93 "sintaxis.y"
 {yyerror("Se esperaba el simbolo de asignacion ':='");}
 break;
 case 39:
-//#line 99 "sintaxis.y"
-{yyerror("Termino incorrecto");}
-break;
-case 41:
 //#line 100 "sintaxis.y"
 {yyerror("Termino incorrecto");}
 break;
-case 46:
-//#line 105 "sintaxis.y"
-{yyerror("Operando invalido");}
+case 41:
+//#line 101 "sintaxis.y"
+{yyerror("Termino incorrecto");}
 break;
-case 48:
+case 46:
 //#line 106 "sintaxis.y"
 {yyerror("Operando invalido");}
 break;
+case 48:
+//#line 107 "sintaxis.y"
+{yyerror("Operando invalido");}
+break;
 case 51:
-//#line 109 "sintaxis.y"
+//#line 110 "sintaxis.y"
 {verificarRango(val_peek(0).sval);}
 break;
 case 54:
-//#line 114 "sintaxis.y"
+//#line 115 "sintaxis.y"
 {setToNegative(val_peek(0));}
 break;
 case 56:
-//#line 118 "sintaxis.y"
+//#line 119 "sintaxis.y"
 {yyerror("Campo de registro invalido");}
 break;
 case 58:
-//#line 121 "sintaxis.y"
+//#line 122 "sintaxis.y"
 {yyval = val_peek(3);}
 break;
 case 59:
-//#line 122 "sintaxis.y"
+//#line 123 "sintaxis.y"
 {yyval = val_peek(1);}
 break;
 case 60:
-//#line 124 "sintaxis.y"
+//#line 125 "sintaxis.y"
 {yyval = val_peek(4);}
 break;
 case 61:
-//#line 125 "sintaxis.y"
+//#line 126 "sintaxis.y"
 {yyerror("Falta la palabra reservada 'entonces'");}
 break;
 case 63:
-//#line 126 "sintaxis.y"
+//#line 127 "sintaxis.y"
 {yyerror("No se encontro el caracter ')'"); }
 break;
 case 65:
-//#line 127 "sintaxis.y"
+//#line 128 "sintaxis.y"
 {yyerror("error en la comparacion')'");}
 break;
 case 67:
-//#line 128 "sintaxis.y"
+//#line 129 "sintaxis.y"
 {yyerror("no se encontro el caracter '('");}
 break;
 case 75:
-//#line 140 "sintaxis.y"
+//#line 141 "sintaxis.y"
 {yyval = val_peek(1);}
 break;
 case 76:
-//#line 142 "sintaxis.y"
+//#line 143 "sintaxis.y"
 {yyval = val_peek(4);}
 break;
 case 77:
-//#line 143 "sintaxis.y"
+//#line 144 "sintaxis.y"
 {yyerror("Falta la palabra reservada iterar");}
 break;
 case 79:
-//#line 144 "sintaxis.y"
+//#line 145 "sintaxis.y"
 {yyerror("Falta el caracter ')'");}
 break;
 case 81:
-//#line 145 "sintaxis.y"
+//#line 146 "sintaxis.y"
 {yyerror("Error en la comparacion");}
 break;
 case 83:
-//#line 146 "sintaxis.y"
+//#line 147 "sintaxis.y"
 {yyerror("La sentencia 'mientras' debe ser seguida del caracter '('");}
 break;
 case 87:
-//#line 152 "sintaxis.y"
+//#line 153 "sintaxis.y"
 {yyval = val_peek(4);}
 break;
 case 88:
-//#line 153 "sintaxis.y"
+//#line 154 "sintaxis.y"
 {yyerror("la sentencia debe finalizar con el caracter ';'");}
 break;
 case 89:
-//#line 154 "sintaxis.y"
+//#line 155 "sintaxis.y"
 {yyerror("Falta el caracter ')'");}
 break;
 case 91:
-//#line 155 "sintaxis.y"
+//#line 156 "sintaxis.y"
 {yyerror("Se esperaba una cadena de caracteres");}
 break;
 case 93:
-//#line 156 "sintaxis.y"
+//#line 157 "sintaxis.y"
 {yyerror("La sentencia 'imprimir' debe ser seguida del caracter '('");}
 break;
-//#line 750 "Parser.java"
+//#line 821 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####
@@ -872,34 +942,10 @@ break;
 //## The -Jnorun option was used ##
 //## end of method run() ########################################
 
-public static double MAX = Math.pow(2, 15)-1;
 
-private void verificarRango(String sval) {
-	double val = Double.parseDouble(sval);
-	if (val>MAX){
-		this.yyerror("La constante se excede del valor permitido");
-	}
-	
-}
+
 //## Constructors ###############################################
-/**
- * Default constructor.  Turn off with -Jnoconstruct .
-
- */
-public Parser()
-{
-  //nothing to do
-}
-
-
-/**
- * Create a parser, setting the debug to true or false.
- * @param debugMe true for debugging, false for no debug.
- */
-public Parser(boolean debugMe)
-{
-  yydebug=debugMe;
-}
+//## The -Jnoconstruct option was used ##
 //###############################################################
 
 
