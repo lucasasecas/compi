@@ -1,23 +1,50 @@
-'h
-+ jhkhjkgjhgj'
-'lalala'
-lkj_as
-ds$lllasdskgfbkdsgfvaslgvbdskz
-ASDASD&sadfdsfs
-ughh5656iii
-+-*/
-**shdfjkasg
-,
-;
->= 
-<=
-<
->  
-:=
-{
-}
-}(
-^
-:^=
+**Declaracion de variables enteras con nombre corto y truncado
+**megasuperlarga deberia quedar megasuperlar
+entero corta, megasuperlarga;
+entero_l a;
 
-32766
+registro {
+	entero c;
+	lala;
+} record;
+
+**constante negativa
+negativo:=-12;
+
+lala:=10 + ss8;
+dadi:= -1 - 33;
+
+**variable con simbolos $, _ y &
+var_i_ab$ := 0;
+
+si (12 < 21) entonces
+	re:=10;
+
+mientras(a=12) iterar{
+	a:= a-1;
+	imprimir('dentro del mientras');
+	si(22 < dede) entonces
+		b:=2;
+	}
+imprimir('cadena'gdfgdfg;
+imprimir ('cadena');
+imprimir lala=;
+a:= a-1;
+
+mientras (a=122)
+z:=12;
+mientras (a=122 
+z:=22;
+mientras lala;
+
+si(w=3)
+x=12;
+si(w03 entonces
+o=3;
+
+A := 22
+
+A :=11;  
+
+
+

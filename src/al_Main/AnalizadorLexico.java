@@ -7,6 +7,8 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import unicen.compiladores.gui.ErrorManager;
+import unicen.compiladores.gui.ParserError;
 import acciones.Action;
 import acciones.Action1;
 import acciones.Action10;
@@ -19,7 +21,6 @@ import acciones.Action7;
 import acciones.Action8;
 import acciones.Action9;
 import as_Parser.ParserVal;
-
 import Utils.BufferedCharStream;
 import Utils.LexicalException;
 import Utils.TablaSimbolo;
@@ -31,19 +32,21 @@ public class AnalizadorLexico {
 	private static final int FINAL = -1;
 	
 	private int ID 		= 257;
-	private int REGISTRO= 158;
-	private int ENTERO 	= 258;
-	private int ENTEROL	= 259;
-	private int CTE 	= 263;
-	private int ASIGN 	= 264;
-	private int SI		= 265;
-	private int SINO	= 266;
-	private int COMP	= 267;
-	private int ENTONCES= 268;
-	private int MIENTRAS= 269;
+	private int REGISTRO= 258;
+	private int ENTERO 	= 259;
+	private int ENTEROL	= 260;
+	private int ASIGN 	= 261;
+	private int CTE 	= 262;
+	private int SI		= 263;
+	private int SINO	= 264;
+	private int COMP	= 265;
+	private int ENTONCES= 266;
+	private int MIENTRAS= 267;
+	private int ITERATE = 268;
+	private int PRINT	= 269;
 	private int STR		= 270;
-	private int PRINT	= 271;
-	private int ITERATE = 273;
+
+
 	private int EOF     = 0;
 	
 	Estado[][] _matrizTransicion;
@@ -59,16 +62,19 @@ public class AnalizadorLexico {
 	
 	public HashMap<String,Integer> _tpr;
 	private TablaSimbolo _tds;
+
+	private ErrorManager errorManager;
 	
-	public AnalizadorLexico(File fuente, TablaSimbolo tds){
+	public AnalizadorLexico(TablaSimbolo tds, ErrorManager errorManager){
+		this.errorManager = errorManager;
 		_tpr = new HashMap<String, Integer>();
 		_tpr.put("entero", ENTERO);
-		_tpr.put("entero", ENTEROL);
+		_tpr.put("entero_l", ENTEROL);
 		_tpr.put("si", SI);
 		_tpr.put("entonces", ENTONCES);
 		_tpr.put("sino", SINO);
 		_tpr.put("mientras", MIENTRAS);
-		_tpr.put("print", PRINT);
+		_tpr.put("imprimir", PRINT);
 		_tpr.put("registro", REGISTRO);
 		_tpr.put("iterar", ITERATE);
 		_tds = tds;
@@ -102,12 +108,6 @@ public class AnalizadorLexico {
 		_errors = new Vector<String>();
 		initMatrix();
 		initMatrixTypes();
-		try {
-			_reader = new BufferedCharStream(fuente);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 	
 	/**
@@ -133,7 +133,7 @@ public class AnalizadorLexico {
 		Action ac2 = new Action2(this);
 		Action ac3 = new Action3(this);
 		Action ac4 = new Action4(this);
-//		Action ac5 = new Action5(this);
+
 		Action ac6 = new Action6(this);
 		Action ac7 = new Action7(this);
 		Action ac8 = new Action8(this);
@@ -190,26 +190,26 @@ public class AnalizadorLexico {
  		matriz[1][21] = new Estado(-1); matriz[1][21].addAction(ac3);
  		matriz[1][22] = new Estado(-1); matriz[1][22].addAction(ac3);
  		
- 		matriz[2][0] = new Estado(1);    matriz[2][0].addAction(ac4);   
+ 		matriz[2][0] = new Estado(-1);    matriz[2][0].addAction(ac4);   
  		matriz[2][1] = new Estado(2);    matriz[2][1].addAction(ac2);   
  		matriz[2][2] = new Estado(-1);   matriz[2][2].addAction(ac4);   
  		matriz[2][3] = new Estado(-1);   matriz[2][3].addAction(ac4);   
- 		matriz[2][4] = new Estado(3);    matriz[2][4].addAction(ac4);  
+ 		matriz[2][4] = new Estado(-1);    matriz[2][4].addAction(ac4);  
  		matriz[2][5] = new Estado(-1);   matriz[2][5].addAction(ac4);   
- 		matriz[2][6] = new Estado(5);    matriz[2][6].addAction(ac4);  
- 		matriz[2][7] = new Estado(7);    matriz[2][7].addAction(ac4);  
- 		matriz[2][8] = new Estado(9);    matriz[2][8].addAction(ac4);  
+ 		matriz[2][6] = new Estado(-1);    matriz[2][6].addAction(ac4);  
+ 		matriz[2][7] = new Estado(-1);    matriz[2][7].addAction(ac4);  
+ 		matriz[2][8] = new Estado(-1);    matriz[2][8].addAction(ac4);  
  		matriz[2][9] = new Estado(-1);   matriz[2][9].addAction(ac4);   
- 		matriz[2][10] = new Estado(11); matriz[2][10].addAction(ac4);  
+ 		matriz[2][10] = new Estado(-1); matriz[2][10].addAction(ac4);  
  		matriz[2][11] = new Estado(-1); matriz[2][11].addAction(ac4);  
  		matriz[2][12] = new Estado(-1); matriz[2][12].addAction(ac4);  
  		matriz[2][13] = new Estado(-1); matriz[2][13].addAction(ac4);  
  		matriz[2][14] = new Estado(-1); matriz[2][14].addAction(ac4);  
  		matriz[2][15] = new Estado(-1); matriz[2][15].addAction(ac4);  
  		matriz[2][16] = new Estado(-1); matriz[2][16].addAction(ac4);  
- 		matriz[2][17] = new Estado(11); matriz[2][17].addAction(ac4);  
- 		matriz[2][18] = new Estado(0);  matriz[2][18].addAction(ac4); 
- 		matriz[2][19] = new Estado(0);  matriz[2][19].addAction(ac4); 
+ 		matriz[2][17] = new Estado(-1); matriz[2][17].addAction(ac4);  
+ 		matriz[2][18] = new Estado(-1);  matriz[2][18].addAction(ac4); 
+ 		matriz[2][19] = new Estado(-1);  matriz[2][19].addAction(ac4); 
  		matriz[2][20] = new Estado(-1); matriz[2][20].addAction(ac4);   
  		matriz[2][21] = new Estado(-1); matriz[2][21].addAction(ac4);  
  		matriz[2][22] = new Estado(-1); matriz[2][22].addAction(ac4);  
@@ -426,7 +426,7 @@ public class AnalizadorLexico {
  		matriz[11][14] = new Estado(11);  matriz[11][14].addAction(ac2);
  		matriz[11][15] = new Estado(11);  matriz[11][15].addAction(ac2);
  		matriz[11][16] = new Estado(11);  matriz[11][16].addAction(ac2);
- 		matriz[11][17] = new Estado(-1);  
+ 		matriz[11][17] = new Estado(-1);  matriz[11][17].addAction(ac10);
  		matriz[11][18] = new Estado(12);  
  		matriz[11][19] = new Estado(11);  matriz[11][19].addAction(ac2);
  		matriz[11][20] = new Estado(11);  matriz[11][20].addAction(ac2);
@@ -487,8 +487,8 @@ public class AnalizadorLexico {
 		_types[0][14] = '}';
 		_types[0][15] = ',';
 		_types[0][16] = ';';
-		_types[0][14] = ':';
 		_types[0][17] = STR;
+
 		_types[0][22] = EOF;
 		_types[3][8] = COMP;
 		
@@ -520,6 +520,7 @@ public class AnalizadorLexico {
 			preState = state;
 			state = transition(state);
 			int col = this.getColumn(_actualChar);
+			int[] d = _types[preState];
 			int newKind = _types[preState][col];
 			if(newKind != -1)
 				_token.kind = newKind;
@@ -569,8 +570,9 @@ public class AnalizadorLexico {
 	}
 	
 
-	public void addErrorMessage(String message) {
-		_errors.add(new String("Error (Linea "+_token.row+"): "+message));
+	public void addErrorMessage(String message, boolean war) {
+		ParserError error = new ParserError(message, ParserError.TYPE_LEXICO, _token.row, war);
+		errorManager.addError(error);
 	}
 
 	public void setMatriz(Estado[][] states) {
@@ -607,13 +609,23 @@ public class AnalizadorLexico {
 
 	public void addTokenToTDS() {
 		TuplaTablaSimbolos tupla = new TuplaTablaSimbolos(new String(_token.sval));
-		tupla._kind = _token.kind;
+		tupla.setValue("clase", _token.kind);
 		_tds.addTupla(tupla);
 		
 	}
 
 	public boolean hayError() {
 		return _errors.size() > 0;
+	}
+
+	public void setReaderOrigin(String source) {
+		try {
+			this._reader = new BufferedCharStream(new File(source));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 }

@@ -2,6 +2,7 @@ package Utils;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Set;
 
 public class TablaSimbolo {
 
@@ -11,8 +12,8 @@ public class TablaSimbolo {
 		_tabla = new HashMap<String, TuplaTablaSimbolos>();
 	}
 	public void addTupla(TuplaTablaSimbolos tts){
-		if(!(_tabla.containsKey(tts.get_value())) )
-				_tabla.put(tts.get_value(),tts);
+		if(!(_tabla.containsKey((String)tts.getValue("valor"))) )
+				_tabla.put((String)tts.getValue("valor"),tts);
 	}
 	
 	public boolean isDeclared(String val, String scope){
@@ -23,7 +24,7 @@ public class TablaSimbolo {
 		}
 		else
 			tupla = getTupla(val+"_f");
-		if(tupla != null && tupla._scope == null)
+		if(tupla != null && (Boolean) tupla.getValue("alcance") == null)
 			return false;
 		return tupla != null;
 	}
@@ -57,27 +58,31 @@ public class TablaSimbolo {
 	public Collection<TuplaTablaSimbolos> values(){
 		return _tabla.values();
 	}
-	
-	public void setTupla(TuplaTablaSimbolos tupla) {
-		TuplaTablaSimbolos nTupla = tupla.clone();
-		this.delTupla(tupla._value);
-		this.addTupla(nTupla);
+	public Set<String> getAllkeys() {
+
+		return _tabla.keySet();
 	}
 	
-	public TuplaTablaSimbolos changeScope(String val){
-		TuplaTablaSimbolos tupla = this.getTupla(val);
-		if(tupla != null){
-			if(tupla._scope != null && tupla._scope.equals("Main"))
-				tupla = tupla.clone();
-			else
-				this.delTupla(val);
-		}
-		else tupla = new TuplaTablaSimbolos();
-		tupla._value = val + "_f";
-		tupla._scope = "funcion";
-		this.addTupla(tupla);
-		return tupla;
-			
-	}
+//	public void setTupla(TuplaTablaSimbolos tupla) {
+//		TuplaTablaSimbolos nTupla = tupla.clone();
+//		this.delTupla(tupla._value);
+//		this.addTupla(nTupla);
+//	}
+	
+//	public TuplaTablaSimbolos changeScope(String val){
+//		TuplaTablaSimbolos tupla = this.getTupla(val);
+//		if(tupla != null){
+//			if(tupla._scope != null && tupla._scope.equals("Main"))
+//				tupla = tupla.clone();
+//			else
+//				this.delTupla(val);
+//		}
+//		else tupla = new TuplaTablaSimbolos();
+//		tupla._value = val + "_f";
+//		tupla._scope = "funcion";
+//		this.addTupla(tupla);
+//		return tupla;
+//			
+//	}
 	
 }

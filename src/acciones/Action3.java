@@ -25,7 +25,7 @@ public class Action3 extends Action {
 		else{
 			if(id.length() > 12){
 				id = id.substring(0, 12);
-				_analizador.addErrorMessage("Warning: el id "+_analizador.getActualToken().sval+" excedio el limite de longitud permitido");
+				_analizador.addErrorMessage("el id "+_analizador.getActualToken().sval+" excedio el limite de longitud permitido", true);
 				_analizador.truncateLexeme(id);
 			}
 			_analizador.addTokenToTDS();

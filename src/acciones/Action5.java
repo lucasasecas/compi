@@ -14,7 +14,7 @@ public class Action5 extends Action {
 	@Override
 	public void ejecutar() throws LexicalException {
 		_analizador.rollback(1);
-		throw new LexicalException(mensaje);
+		_analizador.addErrorMessage(mensaje, false);
 	}
 
 }

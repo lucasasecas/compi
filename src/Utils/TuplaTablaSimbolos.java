@@ -1,12 +1,14 @@
 package Utils;
 
-public class TuplaTablaSimbolos {
+import java.awt.Component;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
-	public String _value;
-	public String _type;
-	public String _use;
-	public int _kind = 0;
-	public String _scope;
+public class TuplaTablaSimbolos {
+	
+	LinkedHashMap<String, Object> tupla;
 	
 	public static enum Scopes
 		{
@@ -16,84 +18,42 @@ public class TuplaTablaSimbolos {
 	
 	
 	public TuplaTablaSimbolos(String value) {
-		this._value = value;
+		this.tupla = new LinkedHashMap<String, Object>();
+		this.tupla.put("valor", value);
 		
 	}
 	
 	public TuplaTablaSimbolos(){
-		
+		this.tupla = new LinkedHashMap<String, Object>();
 	}
 
-	public String get_value() {
-		return _value;
+	public Object getValue(String key) {
+		return tupla.get(key);
 	}
 
-	public void set_value(String value) {
-		this._value = value;
+	public void setValue(String key, Object value) {
+		this.tupla.put(key,
+				value);
 	}
 
-	public String get_type() {
-		return _type;
-	}
-
-	public void set_type(String type) {
-		this._type = type;
-	}
-
-	public String get_use() {
-		return _use;
-	}
-
-	public void set_use(String use) {
-		this._use = use;
-	}
-
-	public int get_kind() {
-		return _kind;
-	}
-
-	public void set_kind(int _kind) {
-		this._kind = _kind;
-	}
-
-	public String get_scope() {
-		return _scope;
-	}
-
-	public void set_scope(String scope) {
-		this._scope = scope;
-	}
-
+	
 	public void mostrar() {
-		String t;
-		switch(_kind){
-			case 257:
-				t = new String("Identificador");
-				break;
-			case 263:
-				t = new String("Constante");
-				break;
-			case 270:
-				t = new String("Cadena de caracteres");
-				break;
-			default:
-				t = new String(" ");
-				break;
+		for(String key : tupla.keySet()){
+			System.out.print(key+": "+tupla.get(key).toString()+"	");
 		}
+		System.out.println('\n');
 				
-		System.out.println("Valor: "+_value+';'+'\t'+"Tipo token: "+t+"; Alcance: "+ _scope+'\t'+"Tipo Variable: "+_type+'\t'+"Usos: "+_use);
+	}
+
+	public Collection<Object> getAllValues() {
+		// TODO Auto-generated method stub
+		return tupla.values();
+	}
+
+	public Set<String> getAllKeys() {
+		// TODO Auto-generated method stub
+		return tupla.keySet();
 	}
 	
-	@Override
-	public TuplaTablaSimbolos clone(){
-		TuplaTablaSimbolos nuevaTupla = new TuplaTablaSimbolos();
-		nuevaTupla.set_kind(_kind);
-		nuevaTupla.set_scope(_scope);
-		nuevaTupla.set_type(_type);
-		nuevaTupla.set_use(_use);
-		nuevaTupla.set_value(_value);
-		return nuevaTupla;
-	
-	}
 
 }

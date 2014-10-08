@@ -18,16 +18,19 @@ public class Main {
 		Parser p;
 		TablaSimbolo tds = new TablaSimbolo();
 //		p = new Parser(args[0], tds);
-		AnalizadorLexico al = new AnalizadorLexico(new File("sources/source.txt"), tds);
-		while (!al.eof()){
-			ParserVal yylval = new ParserVal();
-			 int t = al.getNextToken(yylval);
-			 System.out.println(yylval.sval + " -- " + yylval.kind);
-		}
-		tds.imprimirTablaSimbol();
-//		p = new Parser("sources/source.txt", tds);
+		AnalizadorLexico al = new AnalizadorLexico(tds);
+//		while (!al.eof()){
+//			ParserVal yylval = new ParserVal();
+//			 int t = al.getNextToken(yylval);
+//			 System.out.println(yylval.sval + " -- " + yylval.kind);
+//		}
+//		tds.imprimirTablaSimbol();
+		
+		p = new Parser(tds, al);
 //			
-//		p.run();
+		p.run("sources/source.txt");
+		
+		p.getTablaDeSimbolos().imprimirTablaSimbol();
 //		GeneradorAssembler ga ;
 //		if(!p.hayError()){
 //			ga = new GeneradorAssembler(tds, "sources/aux.txt", p.pila.toArray());
