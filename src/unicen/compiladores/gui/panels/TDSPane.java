@@ -16,7 +16,7 @@ import Utils.TuplaTablaSimbolos;
 public class TDSPane extends JPanel {
 	private JScrollPane jscPnl;
 	private JTable table;
-	private TokensDictionary mapa = new TokensDictionary();
+	private TokensDictionary mapa = TokensDictionary.getInstance();
 	public TDSPane() {
 		jscPnl = new JScrollPane();
 		table = new JTable();
@@ -79,8 +79,13 @@ public class TDSPane extends JPanel {
 		@Override
 		public Object getValueAt(int arg0, int arg1) {
 			if(arg1==1){
-				return mapa.getToken((Integer)data.get(arg0).getValue(cabeceras[arg1])) +" ("+ data.get(arg0).getValue(cabeceras[arg1])+")";
+				TuplaTablaSimbolos tupla = data.get(arg0);
+				String cabecera = cabeceras[arg1];
+				int clase = (Integer)tupla.getValue(cabecera);
+				String trad = mapa.getToken(clase);
+				return trad +" ("+ clase+")";
 			}
+			
 			return data.get(arg0).getValue(cabeceras[arg1]);
 		}
 		

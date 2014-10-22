@@ -55,5 +55,13 @@ public class TuplaTablaSimbolos {
 		return tupla.keySet();
 	}
 	
+	public TuplaTablaSimbolos clone(){
+		TuplaTablaSimbolos tupla = new TuplaTablaSimbolos();
+		for(String key : this.getAllKeys()){
+			tupla.setValue(key, this.getValue(key));
+		}
+		return tupla;
+	}
+	
 
 }

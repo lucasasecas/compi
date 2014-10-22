@@ -28,7 +28,8 @@
 	import Utils.TablaSimbolo;
 	import al_Main.AnalizadorLexico;
 	import Utils.TuplaTablaSimbolos;
-//#line 29 "Parser.java"
+	import unicen.compiladores.gui.utils.TokensDictionary;
+//#line 30 "Parser.java"
 
 
 
@@ -461,7 +462,7 @@ final static String yyrule[] = {
 "Salida : IMPRIMIR error $$21 ';'",
 };
 
-//#line 160 "sintaxis.y"
+//#line 161 "sintaxis.y"
 
 TablaSimbolo tds;
 AnalizadorLexico al;
@@ -543,8 +544,59 @@ private void addUse(String use, List<ParserVal> ids){
 private void addUse(String use, String id){
 	tds.getTupla(id).setValue("uso", use);
 }
-
-//#line 476 "Parser.java"
+private void setGlobalVars(ParserVal val_peek) {
+	for(ParserVal val : val_peek.list){
+		TuplaTablaSimbolos tupla = tds.getTupla(val.sval);
+		if(tupla==null){
+			tupla = new TuplaTablaSimbolos();
+			tupla.setValue("valor", val.sval);
+			tupla.setValue("clase", val.kind);
+			tds.addTupla(tupla);
+		}
+		if(tupla.getValue("uso") != null){
+			this.errorManager.addError(new ParserError("La variable "+val.sval+" ya fue definida",
+					ParserError.TYPE_SINTACTICO, val.row, false));
+			return;
+		}
+		else{
+			tupla.setValue("uso", "variable");
+			tupla.setValue("tipo",val_peek.type);
+		}
+	}
+	
+}
+private void setRecordInnerVars(List<ParserVal> innerVars, List<ParserVal> regVars) {
+	for(ParserVal val : innerVars){
+		TuplaTablaSimbolos tupla = tds.getTupla(val.sval);
+//		chequeo que no este ya definida si lo esta creo una nueva
+		if(tupla.getValue("uso") != null){
+			tupla = new TuplaTablaSimbolos();
+			tupla.setValue("row", val.row);
+			tupla.setValue("clase", val.kind);
+			tupla.setValue("valor", val.sval);
+			
+		}else
+			tds.delTupla(val.sval);
+		tupla.setValue("uso", "variable interna registro");
+		tupla.setValue("tipo",val.type);
+		
+		/**
+		 * Manejo de nameling
+		 */
+		for(ParserVal rVal : regVars){
+			if(tds.getTupla(rVal.sval + "#" + tupla.getValue("valor")) != null){
+				this.errorManager.addError(new ParserError("La variable "+val.sval+" ya fue definida dentro del registro",
+					ParserError.TYPE_SINTACTICO, val.row, false));
+				return;
+			}
+			TuplaTablaSimbolos nueva = tupla.clone();
+			nueva.setValue("valor", rVal.sval + "#" + tupla.getValue("valor"));
+			tds.addTupla(nueva);;
+		}
+	
+	}	
+}
+//#line 528 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -699,202 +751,198 @@ boolean doaction;
       {
 //########## USER-SUPPLIED ACTIONS ##########
 case 2:
-//#line 41 "sintaxis.y"
+//#line 42 "sintaxis.y"
 {yyerror("Se han encontrado errores en las sentencias");}
 break;
 case 6:
-//#line 48 "sintaxis.y"
+//#line 49 "sintaxis.y"
 {addUse("registro", val_peek(0).list);}
 break;
-case 7:
-//#line 49 "sintaxis.y"
-{addUse("variable", val_peek(0).list);}
-break;
 case 8:
-//#line 52 "sintaxis.y"
-{yyval = val_peek(1);}
+//#line 53 "sintaxis.y"
+{yyval = val_peek(1); setRecordInnerVars(val_peek(2).list, val_peek(1).list);}
 break;
 case 9:
-//#line 53 "sintaxis.y"
+//#line 54 "sintaxis.y"
 {yyerror("se ha encontrado un error en la declaracion de variables del registro");}
 break;
 case 11:
-//#line 56 "sintaxis.y"
+//#line 57 "sintaxis.y"
 {yyval.list.addAll(val_peek(2).list); yyval.list.add(val_peek(0));}
 break;
 case 12:
-//#line 57 "sintaxis.y"
+//#line 58 "sintaxis.y"
 {yyval.list.add(val_peek(0));}
 break;
 case 13:
-//#line 60 "sintaxis.y"
-{yyval = val_peek(1); addUse("variable interna registro", val_peek(1).list);}
+//#line 61 "sintaxis.y"
+{yyval = val_peek(1);}
 break;
 case 14:
-//#line 61 "sintaxis.y"
+//#line 62 "sintaxis.y"
 {yyerror("no de encontro el caracter '}'"); }
 break;
 case 16:
-//#line 64 "sintaxis.y"
+//#line 65 "sintaxis.y"
 {yyval.list.addAll(val_peek(1).list);yyval.list.add(val_peek(0));}
 break;
 case 17:
-//#line 65 "sintaxis.y"
+//#line 66 "sintaxis.y"
 {yyval.list.add(val_peek(0));}
 break;
 case 18:
-//#line 68 "sintaxis.y"
-{setType(val_peek(2).sval, val_peek(1).sval); yyval = val_peek(1);}
+//#line 69 "sintaxis.y"
+{yyval = val_peek(1); yyval.type = val_peek(2).sval;}
 break;
 case 19:
-//#line 71 "sintaxis.y"
-{yyval = val_peek(0);}
-break;
-case 20:
 //#line 72 "sintaxis.y"
 {yyval = val_peek(0);}
 break;
+case 20:
+//#line 73 "sintaxis.y"
+{yyval = val_peek(0);}
+break;
 case 21:
-//#line 75 "sintaxis.y"
+//#line 76 "sintaxis.y"
 {yyval.list.addAll(val_peek(2).list); yyval.list.add(val_peek(0));}
 break;
 case 22:
-//#line 76 "sintaxis.y"
+//#line 77 "sintaxis.y"
 {yyval.list.add(val_peek(0));}
 break;
 case 23:
-//#line 79 "sintaxis.y"
-{setType(val_peek(2).sval, val_peek(1).list);yyval = val_peek(1);}
+//#line 80 "sintaxis.y"
+{val_peek(1).type=val_peek(2).sval; setGlobalVars(val_peek(1));}
 break;
 case 26:
-//#line 86 "sintaxis.y"
+//#line 87 "sintaxis.y"
 {nuevaSentencia(val_peek(0),"Asignacion");}
 break;
 case 27:
-//#line 87 "sintaxis.y"
+//#line 88 "sintaxis.y"
 {nuevaSentencia(val_peek(0),"Sentencia 'si'");}
 break;
 case 28:
-//#line 88 "sintaxis.y"
+//#line 89 "sintaxis.y"
 {nuevaSentencia(val_peek(0),"sentencia 'mientras'");}
 break;
 case 29:
-//#line 89 "sintaxis.y"
+//#line 90 "sintaxis.y"
 {nuevaSentencia(val_peek(0),"Sentencia 'imprimir'");}
 break;
 case 30:
-//#line 91 "sintaxis.y"
+//#line 92 "sintaxis.y"
 {yyval = val_peek(2);}
 break;
 case 31:
-//#line 92 "sintaxis.y"
+//#line 93 "sintaxis.y"
 {yyerror("Sentencia debe finalizar con caracter ';'");}
 break;
 case 33:
-//#line 93 "sintaxis.y"
+//#line 94 "sintaxis.y"
 {yyerror("Se esperaba el simbolo de asignacion ':='");}
 break;
 case 39:
-//#line 100 "sintaxis.y"
-{yyerror("Termino incorrecto");}
-break;
-case 41:
 //#line 101 "sintaxis.y"
 {yyerror("Termino incorrecto");}
 break;
-case 46:
-//#line 106 "sintaxis.y"
-{yyerror("Operando invalido");}
+case 41:
+//#line 102 "sintaxis.y"
+{yyerror("Termino incorrecto");}
 break;
-case 48:
+case 46:
 //#line 107 "sintaxis.y"
 {yyerror("Operando invalido");}
 break;
+case 48:
+//#line 108 "sintaxis.y"
+{yyerror("Operando invalido");}
+break;
 case 51:
-//#line 110 "sintaxis.y"
+//#line 111 "sintaxis.y"
 {verificarRango(val_peek(0).sval);}
 break;
 case 54:
-//#line 115 "sintaxis.y"
+//#line 116 "sintaxis.y"
 {setToNegative(val_peek(0));}
 break;
 case 56:
-//#line 119 "sintaxis.y"
+//#line 120 "sintaxis.y"
 {yyerror("Campo de registro invalido");}
 break;
 case 58:
-//#line 122 "sintaxis.y"
+//#line 123 "sintaxis.y"
 {yyval = val_peek(3);}
 break;
 case 59:
-//#line 123 "sintaxis.y"
+//#line 124 "sintaxis.y"
 {yyval = val_peek(1);}
 break;
 case 60:
-//#line 125 "sintaxis.y"
+//#line 126 "sintaxis.y"
 {yyval = val_peek(4);}
 break;
 case 61:
-//#line 126 "sintaxis.y"
+//#line 127 "sintaxis.y"
 {yyerror("Falta la palabra reservada 'entonces'");}
 break;
 case 63:
-//#line 127 "sintaxis.y"
+//#line 128 "sintaxis.y"
 {yyerror("No se encontro el caracter ')'"); }
 break;
 case 65:
-//#line 128 "sintaxis.y"
+//#line 129 "sintaxis.y"
 {yyerror("error en la comparacion')'");}
 break;
 case 67:
-//#line 129 "sintaxis.y"
+//#line 130 "sintaxis.y"
 {yyerror("no se encontro el caracter '('");}
 break;
 case 75:
-//#line 141 "sintaxis.y"
+//#line 142 "sintaxis.y"
 {yyval = val_peek(1);}
 break;
 case 76:
-//#line 143 "sintaxis.y"
+//#line 144 "sintaxis.y"
 {yyval = val_peek(4);}
 break;
 case 77:
-//#line 144 "sintaxis.y"
+//#line 145 "sintaxis.y"
 {yyerror("Falta la palabra reservada iterar");}
 break;
 case 79:
-//#line 145 "sintaxis.y"
+//#line 146 "sintaxis.y"
 {yyerror("Falta el caracter ')'");}
 break;
 case 81:
-//#line 146 "sintaxis.y"
+//#line 147 "sintaxis.y"
 {yyerror("Error en la comparacion");}
 break;
 case 83:
-//#line 147 "sintaxis.y"
+//#line 148 "sintaxis.y"
 {yyerror("La sentencia 'mientras' debe ser seguida del caracter '('");}
 break;
 case 87:
-//#line 153 "sintaxis.y"
+//#line 154 "sintaxis.y"
 {yyval = val_peek(4);}
 break;
 case 88:
-//#line 154 "sintaxis.y"
+//#line 155 "sintaxis.y"
 {yyerror("la sentencia debe finalizar con el caracter ';'");}
 break;
 case 89:
-//#line 155 "sintaxis.y"
+//#line 156 "sintaxis.y"
 {yyerror("Falta el caracter ')'");}
 break;
 case 91:
-//#line 156 "sintaxis.y"
+//#line 157 "sintaxis.y"
 {yyerror("Se esperaba una cadena de caracteres");}
 break;
 case 93:
-//#line 157 "sintaxis.y"
+//#line 158 "sintaxis.y"
 {yyerror("La sentencia 'imprimir' debe ser seguida del caracter '('");}
 break;
-//#line 821 "Parser.java"
+//#line 869 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

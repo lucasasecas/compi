@@ -5,8 +5,16 @@ import java.util.HashMap;
 public class TokensDictionary {
 
 	HashMap<Integer, String> mapa = new HashMap<Integer,String>();
+	private static TokensDictionary _instance;
 	
-	public TokensDictionary(){
+	public static TokensDictionary getInstance(){
+		if(_instance == null){
+			_instance = new TokensDictionary();
+		}
+		return _instance;
+	}
+	
+	private TokensDictionary(){
 		mapa.put(new Integer(257), "Identificador");
 		mapa.put(new Integer(258), "Registro");
 		mapa.put(new Integer(259), "entero");
@@ -26,8 +34,10 @@ public class TokensDictionary {
 
 	}
 	public  String getToken(int id){
-		return mapa.get(new Integer(id));
+		String result = mapa.get(new Integer(id));
+		return result;
 	}
+	
 	public String getToken(String value) {
 		Integer integer = Integer.parseInt(value);
 		return mapa.get(integer);

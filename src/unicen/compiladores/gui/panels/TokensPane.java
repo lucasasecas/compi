@@ -50,7 +50,7 @@ public class TokensPane extends JPanel{
 		}
 		
 		public SimpleModel(){
-			mapa = new TokensDictionary();
+			mapa = TokensDictionary.getInstance();
 		}
 		
 		public void addElements(Vector<ParserVal> tokens) {

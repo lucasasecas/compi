@@ -33,7 +33,7 @@ public int kind = 0;
 
 public int row = 0;
 
-public int type = 0;
+public String  type;
 /**
  * object value of this 'union'
  */
