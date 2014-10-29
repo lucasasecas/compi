@@ -79,7 +79,7 @@ public class AnalizadorLexico {
 		_tpr.put("iterar", ITERATE);
 		_tds = tds;
 		
-		_patterns = new Pattern[21];
+		_patterns = new Pattern[22];
 		_patterns[0] = Pattern.compile("[a-zA-Z]"); 
 		_patterns[1] = Pattern.compile("\\d");
 		_patterns[2] = Pattern.compile("\\+");
@@ -98,9 +98,10 @@ public class AnalizadorLexico {
 		_patterns[15] = Pattern.compile("\\,");
 		_patterns[16] = Pattern.compile("\\;");
 		_patterns[17] = Pattern.compile("\\'");
-		_patterns[18] = Pattern.compile("\\r|\\n");
-		_patterns[19] = Pattern.compile("\\t|\\s");
-		_patterns[20] = Pattern.compile("$|\\&|_");
+		_patterns[18] = Pattern.compile("\\.");
+		_patterns[19] = Pattern.compile("\\r|\\n");
+		_patterns[20] = Pattern.compile("\\t|\\s");
+		_patterns[21] = Pattern.compile("\\$|\\&|_");
 		
 		
 		
@@ -118,14 +119,14 @@ public class AnalizadorLexico {
 	private int getColumn(int c){
 		Matcher m;
 		if(c == 0)
-			return 22;
+			return _patterns.length+1;
 		String sC = "" + (char) c;
 		for(int i=0; i<_patterns.length; i++){
 			m = _patterns[i].matcher(sC);
 			if(m.find())
 				return i;
 		}
-		return 21;
+		return _patterns.length;
 	}
 	
 	public void initMatrix(){
@@ -140,7 +141,7 @@ public class AnalizadorLexico {
 		Action ac9 = new Action9(this);
 		Action ac10 = new Action10(this);
  		
-		Estado[][] matriz = new Estado[13][23];
+		Estado[][] matriz = new Estado[13][24];
 		
 		matriz[0][0] = new Estado(1);	matriz[0][0].addAction(ac1);	matriz[0][0].addAction(ac2);
  		matriz[0][1] = new Estado(2); 	matriz[0][1].addAction(ac1);	matriz[0][1].addAction(ac2);
@@ -160,11 +161,12 @@ public class AnalizadorLexico {
  		matriz[0][15] = new Estado(-1); matriz[0][15].addAction(ac1);	matriz[0][15].addAction(ac2);
  		matriz[0][16] = new Estado(-1); matriz[0][16].addAction(ac1);	matriz[0][16].addAction(ac2);
  		matriz[0][17] = new Estado(11); matriz[0][17].addAction(ac1);
- 		matriz[0][18] = new Estado(0);  //matriz[0][18].addAction(ac8);
- 		matriz[0][19] = new Estado(0);  //matriz[0][19].addAction(ac8);
- 		matriz[0][20] = new Estado(-1); matriz[0][20].addAction(ac3);
+ 		matriz[0][18] = new Estado(-1); matriz[0][18].addAction(ac1);	matriz[0][18].addAction(ac2);
+ 		matriz[0][19] = new Estado(0);  //matriz[0][18].addAction(ac8);
+ 		matriz[0][20] = new Estado(0);  //matriz[0][19].addAction(ac8);
  		matriz[0][21] = new Estado(-1); matriz[0][21].addAction(ac3);
- 		matriz[0][22] = new Estado(-1); matriz[0][22].addAction(ac1);
+ 		matriz[0][22] = new Estado(-1); matriz[0][22].addAction(ac3);
+ 		matriz[0][23] = new Estado(-1); matriz[0][23].addAction(ac1);
 		
 		matriz[1][0] = new Estado(1);   matriz[1][0].addAction(ac2); 
  		matriz[1][1] = new Estado(1);   matriz[1][1].addAction(ac2); 
@@ -185,10 +187,11 @@ public class AnalizadorLexico {
  		matriz[1][16] = new Estado(-1); matriz[1][16].addAction(ac3); 
  		matriz[1][17] = new Estado(-1); matriz[1][17].addAction(ac3); 
  		matriz[1][18] = new Estado(-1);  matriz[1][18].addAction(ac3); 
- 		matriz[1][19] = new Estado(-1);  matriz[1][19].addAction(ac3);
- 		matriz[1][20] = new Estado(1); matriz[1][20].addAction(ac2);
- 		matriz[1][21] = new Estado(-1); matriz[1][21].addAction(ac3);
+ 		matriz[1][19] = new Estado(-1);  matriz[1][19].addAction(ac3); 
+ 		matriz[1][20] = new Estado(-1);  matriz[1][20].addAction(ac3);
+ 		matriz[1][21] = new Estado(1); matriz[1][21].addAction(ac2);
  		matriz[1][22] = new Estado(-1); matriz[1][22].addAction(ac3);
+ 		matriz[1][23] = new Estado(-1); matriz[1][23].addAction(ac3);
  		
  		matriz[2][0] = new Estado(-1);    matriz[2][0].addAction(ac4);   
  		matriz[2][1] = new Estado(2);    matriz[2][1].addAction(ac2);   
@@ -208,11 +211,12 @@ public class AnalizadorLexico {
  		matriz[2][15] = new Estado(-1); matriz[2][15].addAction(ac4);  
  		matriz[2][16] = new Estado(-1); matriz[2][16].addAction(ac4);  
  		matriz[2][17] = new Estado(-1); matriz[2][17].addAction(ac4);  
- 		matriz[2][18] = new Estado(-1);  matriz[2][18].addAction(ac4); 
+ 		matriz[2][18] = new Estado(-1);  matriz[2][18].addAction(ac4);
  		matriz[2][19] = new Estado(-1);  matriz[2][19].addAction(ac4); 
- 		matriz[2][20] = new Estado(-1); matriz[2][20].addAction(ac4);   
- 		matriz[2][21] = new Estado(-1); matriz[2][21].addAction(ac4);  
+ 		matriz[2][20] = new Estado(-1);  matriz[2][20].addAction(ac4); 
+ 		matriz[2][21] = new Estado(-1); matriz[2][21].addAction(ac4);   
  		matriz[2][22] = new Estado(-1); matriz[2][22].addAction(ac4);  
+ 		matriz[2][23] = new Estado(-1); matriz[2][23].addAction(ac4);  
  		
  		matriz[3][0] = new Estado(-1); 	matriz[3][0].addAction(ac8); 
  		matriz[3][1] = new Estado(-1); 	matriz[3][1].addAction(ac8);
@@ -237,6 +241,7 @@ public class AnalizadorLexico {
  		matriz[3][20] = new Estado(-1);	matriz[3][20].addAction(ac8);
  		matriz[3][21] = new Estado(-1);	matriz[3][21].addAction(ac8);
  		matriz[3][22] = new Estado(-1);	matriz[3][22].addAction(ac8);
+ 		matriz[3][23] = new Estado(-1);	matriz[3][23].addAction(ac8);
  		
  		matriz[4][0] = new Estado(4); 
  		matriz[4][1] = new Estado(4); 
@@ -256,11 +261,12 @@ public class AnalizadorLexico {
  		matriz[4][15] = new Estado(4);
  		matriz[4][16] = new Estado(4);
  		matriz[4][17] = new Estado(4);
- 		matriz[4][18] = new Estado(0);
- 		matriz[4][19] = new Estado(4); 
- 		matriz[4][20] = new Estado(4);
+ 		matriz[4][18] = new Estado(4);
+ 		matriz[4][19] = new Estado(0);
+ 		matriz[4][20] = new Estado(4); 
  		matriz[4][21] = new Estado(4);
  		matriz[4][22] = new Estado(4);
+ 		matriz[4][23] = new Estado(4);
  		
  		matriz[5][0] = new  Estado(-1); matriz[5][0].addAction(ac8);
  		matriz[5][1] = new  Estado(-1); matriz[5][1].addAction(ac8);
@@ -285,6 +291,7 @@ public class AnalizadorLexico {
  		matriz[5][20] = new Estado(-1); matriz[5][20].addAction(ac8);
  		matriz[5][21] = new Estado(-1); matriz[5][21].addAction(ac8);
  		matriz[5][22] = new Estado(-1); matriz[5][22].addAction(ac8);
+ 		matriz[5][23] = new Estado(-1); matriz[5][23].addAction(ac8);
  		
  		matriz[6][0] =  new Estado(-1); 
  		matriz[6][1] =  new Estado(-1); 
@@ -305,10 +312,11 @@ public class AnalizadorLexico {
  		matriz[6][16] = new Estado(-1);
  		matriz[6][17] = new Estado(-1);
  		matriz[6][18] = new Estado(-1);
- 		matriz[6][19] = new Estado(-1); 
- 		matriz[6][20] = new Estado(-1);
+ 		matriz[6][19] = new Estado(-1);
+ 		matriz[6][20] = new Estado(-1); 
  		matriz[6][21] = new Estado(-1);
  		matriz[6][22] = new Estado(-1);
+ 		matriz[6][23] = new Estado(-1);
  		
  		matriz[7][0] = new Estado(-1);   matriz[7][0].addAction(ac8); 
  		matriz[7][1] = new Estado(-1);   matriz[7][1].addAction(ac8); 
@@ -330,9 +338,10 @@ public class AnalizadorLexico {
  		matriz[7][17] = new Estado(-1); matriz[7][17].addAction(ac8);
  		matriz[7][18] = new Estado(-1);  matriz[7][18].addAction(ac8);
  		matriz[7][19] = new Estado(-1);  matriz[7][19].addAction(ac8);
- 		matriz[7][20] = new Estado(-1); matriz[7][20].addAction(ac8);
+ 		matriz[7][20] = new Estado(-1);  matriz[7][20].addAction(ac8);
  		matriz[7][21] = new Estado(-1); matriz[7][21].addAction(ac8);
  		matriz[7][22] = new Estado(-1); matriz[7][22].addAction(ac8);
+ 		matriz[7][23] = new Estado(-1); matriz[7][23].addAction(ac8);
  		
  		matriz[8][0] =  new Estado(-1);
  		matriz[8][1] =  new Estado(-1);
@@ -357,6 +366,7 @@ public class AnalizadorLexico {
  		matriz[8][20] = new Estado(-1);
  		matriz[8][21] = new Estado(-1);
  		matriz[8][22] = new Estado(-1);
+ 		matriz[8][23] = new Estado(-1);
  		
  		Action5 ac5_9 = new Action5(this, "luego del caracter ':' se espera el caracter '='");
  		matriz[9][0] = new Estado(-1);   matriz[9][0].addAction(ac5_9); 
@@ -379,9 +389,10 @@ public class AnalizadorLexico {
  		matriz[9][17] = new Estado(-1); matriz[9][17].addAction(ac5_9);
  		matriz[9][18] = new Estado(-1);  matriz[9][18].addAction(ac5_9);
  		matriz[9][19] = new Estado(-1);  matriz[9][19].addAction(ac5_9);
- 		matriz[9][20] = new Estado(-1); matriz[9][20].addAction(ac5_9);
+ 		matriz[9][20] = new Estado(-1);  matriz[9][20].addAction(ac5_9);
  		matriz[9][21] = new Estado(-1); matriz[9][21].addAction(ac5_9);
  		matriz[9][22] = new Estado(-1); matriz[9][22].addAction(ac5_9);
+ 		matriz[9][23] = new Estado(-1); matriz[9][23].addAction(ac5_9);
  		
  		Action5 ac5_10 = new Action5(this, "luego del caracter '^' se espera el caracter '='");
  		matriz[10][0] = new Estado(-1);  matriz[10][0].addAction(ac5_10); 
@@ -407,6 +418,7 @@ public class AnalizadorLexico {
  		matriz[10][20] = new Estado(-1); matriz[10][20].addAction(ac5_10);
  		matriz[10][21] = new Estado(-1); matriz[10][21].addAction(ac5_10);
  		matriz[10][22] = new Estado(-1); matriz[10][22].addAction(ac5_10);
+ 		matriz[10][23] = new Estado(-1); matriz[10][23].addAction(ac5_10);
  		
  		Action5 ac5_11 = new Action5(this, "La cadena de caracteres debe finalizar con el caracter \"'\"");
  		matriz[11][0] = new Estado(11);    matriz[11][0].addAction(ac2);
@@ -427,11 +439,12 @@ public class AnalizadorLexico {
  		matriz[11][15] = new Estado(11);  matriz[11][15].addAction(ac2);
  		matriz[11][16] = new Estado(11);  matriz[11][16].addAction(ac2);
  		matriz[11][17] = new Estado(-1);  matriz[11][17].addAction(ac10);
- 		matriz[11][18] = new Estado(12);  
- 		matriz[11][19] = new Estado(11);  matriz[11][19].addAction(ac2);
+ 		matriz[11][18] = new Estado(11);  matriz[11][18].addAction(ac2);
+ 		matriz[11][19] = new Estado(12);  
  		matriz[11][20] = new Estado(11);  matriz[11][20].addAction(ac2);
  		matriz[11][21] = new Estado(11);  matriz[11][21].addAction(ac2);
- 		matriz[11][22] = new Estado(11);  matriz[11][22].addAction(ac5_11);
+ 		matriz[11][22] = new Estado(11);  matriz[11][22].addAction(ac2);
+ 		matriz[11][23] = new Estado(11);  matriz[11][23].addAction(ac5_11);
  		
  		
  		matriz[12][0] = new Estado(11);  
@@ -452,11 +465,12 @@ public class AnalizadorLexico {
  		matriz[12][15] = new Estado(11); 
  		matriz[12][16] = new Estado(11); 
  		matriz[12][17] = new Estado(11); 
- 		matriz[12][18] = new Estado(12); 
- 		matriz[12][19] = new Estado(11); 
+ 		matriz[12][18] = new Estado(11); 
+ 		matriz[12][19] = new Estado(12); 
  		matriz[12][20] = new Estado(11); 
  		matriz[12][21] = new Estado(11); 
  		matriz[12][22] = new Estado(11); 
+ 		matriz[12][23] = new Estado(11); 
 
 
  		this.setMatriz(matriz);
@@ -465,7 +479,7 @@ public class AnalizadorLexico {
 	
 	private void initMatrixTypes(){
 	
-		_types = new int[13][23];
+		_types = new int[13][24];
 		for(int i = 0; i<12; i++)
 			for(int j=0; j<23; j++)
 				_types[i][j] = -1;
@@ -488,8 +502,8 @@ public class AnalizadorLexico {
 		_types[0][15] = ',';
 		_types[0][16] = ';';
 		_types[0][17] = STR;
-
-		_types[0][22] = EOF;
+		_types[0][18] = '.';
+		_types[0][23] = EOF;
 		_types[3][8] = COMP;
 		
 	}
@@ -503,8 +517,8 @@ public class AnalizadorLexico {
 	 * @throws LexicalException
 	 */
 	private int transition(int state) throws LexicalException {
-		int column = this.getColumn((char) _actualChar);
-		Estado st =_matrizTransicion[state][column];
+		int colum = this.getColumn((char) _actualChar);
+		Estado st =_matrizTransicion[state][colum];
 		
 		st.performActions();
 		return st.getState();
@@ -540,7 +554,7 @@ public class AnalizadorLexico {
 				lval = _token;
 				return _token.kind;
 			} catch (Exception e){
-				System.err.println(e);
+				System.err.println(e.toString());
 			}
 		}
 		
