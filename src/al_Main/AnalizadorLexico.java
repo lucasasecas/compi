@@ -446,31 +446,32 @@ public class AnalizadorLexico {
  		matriz[11][22] = new Estado(11);  matriz[11][22].addAction(ac2);
  		matriz[11][23] = new Estado(11);  matriz[11][23].addAction(ac5_11);
  		
- 		
- 		matriz[12][0] = new Estado(11);  
- 		matriz[12][1] = new Estado(11);  
- 		matriz[12][2] = new Estado(11);  
- 		matriz[12][3] = new Estado(11);  
- 		matriz[12][4] = new Estado(11);  
- 		matriz[12][5] = new Estado(11);  
- 		matriz[12][6] = new Estado(11);  
- 		matriz[12][7] = new Estado(11);  
- 		matriz[12][8] = new Estado(11);  
- 		matriz[12][9] = new Estado(11);  
- 		matriz[12][10] = new Estado(11); 
- 		matriz[12][11] = new Estado(11); 
- 		matriz[12][12] = new Estado(11); 
- 		matriz[12][13] = new Estado(11); 
- 		matriz[12][14] = new Estado(11); 
- 		matriz[12][15] = new Estado(11); 
- 		matriz[12][16] = new Estado(11); 
- 		matriz[12][17] = new Estado(11); 
- 		matriz[12][18] = new Estado(11); 
- 		matriz[12][19] = new Estado(12); 
- 		matriz[12][20] = new Estado(11); 
- 		matriz[12][21] = new Estado(11); 
- 		matriz[12][22] = new Estado(11); 
- 		matriz[12][23] = new Estado(11); 
+ 		//TODO debe saltar error si no hay un signo mas
+ 		Action5 ac5_12 = new Action5(this, "Falta el caracter '+' para generar caracteres multilinea");
+ 		matriz[12][0] = new Estado(-1);     matriz[12][0].addAction(ac5_12);
+ 		matriz[12][1] = new Estado(-1);     matriz[12][1].addAction(ac5_12);
+ 		matriz[12][2] = new Estado(11);     
+ 		matriz[12][3] = new Estado(-1);     matriz[12][3].addAction(ac5_12);
+ 		matriz[12][4] = new Estado(-1);     matriz[12][4].addAction(ac5_12);
+ 		matriz[12][5] = new Estado(-1);     matriz[12][5].addAction(ac5_12);
+ 		matriz[12][6] = new Estado(-1);     matriz[12][6].addAction(ac5_12);
+ 		matriz[12][7] = new Estado(-1);     matriz[12][7].addAction(ac5_12);
+ 		matriz[12][8] = new Estado(-1);     matriz[12][8].addAction(ac5_12);
+ 		matriz[12][9] = new Estado(-1);     matriz[12][9].addAction(ac5_12);
+ 		matriz[12][10] = new Estado(-1);   matriz[12][10].addAction(ac5_12);
+ 		matriz[12][11] = new Estado(-1);   matriz[12][11].addAction(ac5_12);
+ 		matriz[12][12] = new Estado(-1);   matriz[12][12].addAction(ac5_12);
+ 		matriz[12][13] = new Estado(-1);   matriz[12][13].addAction(ac5_12);
+ 		matriz[12][14] = new Estado(-1);   matriz[12][14].addAction(ac5_12);
+ 		matriz[12][15] = new Estado(-1);   matriz[12][15].addAction(ac5_12);
+ 		matriz[12][16] = new Estado(-1);   matriz[12][16].addAction(ac5_12);
+ 		matriz[12][17] = new Estado(-1);   matriz[12][17].addAction(ac5_12);
+ 		matriz[12][18] = new Estado(-1);   matriz[12][18].addAction(ac5_12);
+ 		matriz[12][19] = new Estado(12);
+ 		matriz[12][20] = new Estado(12); 
+ 		matriz[12][21] = new Estado(-1);   matriz[12][21].addAction(ac5_12);
+ 		matriz[12][22] = new Estado(-1);   matriz[12][22].addAction(ac5_12);
+ 		matriz[12][23] = new Estado(-1);   matriz[12][23].addAction(ac5_12);
 
 
  		this.setMatriz(matriz);
@@ -480,7 +481,7 @@ public class AnalizadorLexico {
 	private void initMatrixTypes(){
 	
 		_types = new int[13][24];
-		for(int i = 0; i<12; i++)
+		for(int i = 0; i<13; i++)
 			for(int j=0; j<23; j++)
 				_types[i][j] = -1;
 		
