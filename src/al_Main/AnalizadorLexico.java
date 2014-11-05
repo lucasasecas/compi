@@ -12,6 +12,7 @@ import unicen.compiladores.gui.ParserError;
 import acciones.Action;
 import acciones.Action1;
 import acciones.Action10;
+import acciones.Action11;
 import acciones.Action2;
 import acciones.Action3;
 import acciones.Action4;
@@ -140,9 +141,10 @@ public class AnalizadorLexico {
 		Action ac8 = new Action8(this);
 		Action ac9 = new Action9(this);
 		Action ac10 = new Action10(this);
+		Action ac11 = new Action11(this);
  		
 		Estado[][] matriz = new Estado[13][24];
-		
+		Action5 ac5_1 = new Action5(this, "Caracter invalido");
 		matriz[0][0] = new Estado(1);	matriz[0][0].addAction(ac1);	matriz[0][0].addAction(ac2);
  		matriz[0][1] = new Estado(2); 	matriz[0][1].addAction(ac1);	matriz[0][1].addAction(ac2);
  		matriz[0][2] = new Estado(-1);	matriz[0][2].addAction(ac1);	matriz[0][2].addAction(ac2);
@@ -165,7 +167,7 @@ public class AnalizadorLexico {
  		matriz[0][19] = new Estado(0);  //matriz[0][18].addAction(ac8);
  		matriz[0][20] = new Estado(0);  //matriz[0][19].addAction(ac8);
  		matriz[0][21] = new Estado(-1); matriz[0][21].addAction(ac3);
- 		matriz[0][22] = new Estado(-1); matriz[0][22].addAction(ac3);
+ 		matriz[0][22] = new Estado(0);  matriz[0][22].addAction(ac11);
  		matriz[0][23] = new Estado(-1); matriz[0][23].addAction(ac1);
 		
 		matriz[1][0] = new Estado(1);   matriz[1][0].addAction(ac2); 
@@ -266,7 +268,7 @@ public class AnalizadorLexico {
  		matriz[4][20] = new Estado(4); 
  		matriz[4][21] = new Estado(4);
  		matriz[4][22] = new Estado(4);
- 		matriz[4][23] = new Estado(4);
+ 		matriz[4][23] = new Estado(0);
  		
  		matriz[5][0] = new  Estado(-1); matriz[5][0].addAction(ac8);
  		matriz[5][1] = new  Estado(-1); matriz[5][1].addAction(ac8);
@@ -646,6 +648,12 @@ public class AnalizadorLexico {
 	public void setTypeOfToken(String tipo) {
 		TuplaTablaSimbolos tupla = _tds.getTupla(_token.sval);
 		tupla.setValue("tipo", tipo);
+		
+	}
+
+	public void errorCaracterInvalido(boolean b) {
+		this.initToken();
+		this.addErrorMessage("el caracter '"+(char)_actualChar+"' es un caracter invalido", false);
 		
 	}
 
