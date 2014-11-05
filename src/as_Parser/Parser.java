@@ -19,16 +19,16 @@
 //#line 2 "sintaxis.y"
 	package as_Parser;
 	import java.util.Vector;
-
 	import java.util.List;
-	import unicen.compiladores.gui.ErrorManager;
-	import unicen.compiladores.gui.ParserError;
-	import unicen.compiladores.gui.Sentencia;
-	import unicen.compiladores.gui.SentenciaManager;
-	import Utils.TablaSimbolo;
-	import al_Main.AnalizadorLexico;
-	import Utils.TuplaTablaSimbolos;
-	import unicen.compiladores.gui.utils.TokensDictionary;
+
+import unicen.compiladores.gui.ErrorManager;
+import unicen.compiladores.gui.ParserError;
+import unicen.compiladores.gui.Sentencia;
+import unicen.compiladores.gui.SentenciaManager;
+import Utils.TablaSimbolo;
+import al_Main.AnalizadorLexico;
+import Utils.TuplaTablaSimbolos;
+import unicen.compiladores.gui.utils.TokensDictionary;
 //#line 30 "Parser.java"
 
 
@@ -469,9 +469,12 @@ public TablaSimbolo getTablaDeSimbolos() {
 
 private void setToNegative(ParserVal val_peek) {
 	TuplaTablaSimbolos tupla = tds.getTupla(val_peek.sval);
-	tupla.setValue("negativo", true);
-	
+	Double neg = Double.valueOf((String) tupla.getValue("valor"))*-1;
+	int val = neg.intValue();
+	tupla.setValue("valor", val);
+	tupla.setValue("negativo", true);	
 }
+
 
 public void nuevaSentencia(ParserVal lval,String sentencia){
 	this.sentenciasManager.addSentence(
@@ -503,7 +506,14 @@ private void setType(String tipo, String var){
 	tds.getTupla(var).setValue("tipo", tipo);
 }
 
-private void verificarRango(String a){
+private void verificarRango(String a, int nro){
+	double max = Math.pow(2, 31)-1;
+	double val = Double.valueOf(a);
+	if(val>max){
+			errorManager.addError(new ParserError("Constante fuera de rango", ParserError.TYPE_LEXICO,nro ,false));
+			tds.delTupla(a);
+	}
+	
 }
 
 private void addUse(String use, List<ParserVal> ids){
@@ -583,7 +593,7 @@ private void setRecordInnerVars(List<ParserVal> innerVars, List<ParserVal> regVa
 	
 	}	
 }
-//#line 515 "Parser.java"
+//#line 524 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -852,7 +862,7 @@ case 41:
 break;
 case 42:
 //#line 117 "sintaxis.y"
-{verificarRango(val_peek(0).sval);}
+{verificarRango(val_peek(0).sval, val_peek(0).row);}
 break;
 case 45:
 //#line 122 "sintaxis.y"
@@ -941,7 +951,7 @@ case 75:
 //#line 178 "sintaxis.y"
 {yyerror("la sentencia debe finalizar con el caracter ';'");}
 break;
-//#line 868 "Parser.java"
+//#line 877 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####
