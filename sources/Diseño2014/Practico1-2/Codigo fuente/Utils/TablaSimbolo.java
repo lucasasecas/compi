@@ -12,7 +12,6 @@ public class TablaSimbolo {
 		_tabla = new HashMap<String, TuplaTablaSimbolos>();
 	}
 	public void addTupla(TuplaTablaSimbolos tts){
-		TuplaTablaSimbolos t= tts;
 		if(!(_tabla.containsKey((String)tts.getValue("valor"))) )
 				_tabla.put((String)tts.getValue("valor"),tts);
 	}
@@ -64,6 +63,26 @@ public class TablaSimbolo {
 		return _tabla.keySet();
 	}
 	
-
+//	public void setTupla(TuplaTablaSimbolos tupla) {
+//		TuplaTablaSimbolos nTupla = tupla.clone();
+//		this.delTupla(tupla._value);
+//		this.addTupla(nTupla);
+//	}
+	
+//	public TuplaTablaSimbolos changeScope(String val){
+//		TuplaTablaSimbolos tupla = this.getTupla(val);
+//		if(tupla != null){
+//			if(tupla._scope != null && tupla._scope.equals("Main"))
+//				tupla = tupla.clone();
+//			else
+//				this.delTupla(val);
+//		}
+//		else tupla = new TuplaTablaSimbolos();
+//		tupla._value = val + "_f";
+//		tupla._scope = "funcion";
+//		this.addTupla(tupla);
+//		return tupla;
+//			
+//	}
 	
 }

@@ -1,0 +1,1 @@
+parser\yacc -Jnoconstruct -Jnorun -v sintaxis.y

@@ -1,7 +1,5 @@
 package as_Parser;
 
-import gc_Assembler.NodoArbol;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,16 +32,12 @@ public String sval =new String();
 public int kind = 0;
 
 public int row = 0;
-
-public String  type;
 /**
  * object value of this 'union'
  */
 public List<ParserVal> list = new ArrayList<ParserVal>();
 
 public Object obj;
-
-public NodoArbol sref;
 
 //#############################################
 //## C O N S T R U C T O R S

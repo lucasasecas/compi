@@ -1,0 +1,1374 @@
+   0  $accept : Programa $end
+
+   1  Programa : Declaraciones Sentencias
+   2           | Declaraciones
+
+   3  Declaraciones : Declaraciones Declaracion
+   4                | Declaracion
+
+   5  Declaracion : Declaracion_reg
+   6              | Declaracion_var
+
+   7  Declaracion_reg : REGISTRO Cuerpo_reg Lista_var_reg ';'
+
+   8  $$1 :
+
+   9  Declaracion_reg : REGISTRO error $$1 Lista_var_reg ';'
+
+  10  Lista_var_reg : Lista_var_reg ',' ID
+  11                | ID
+
+  12  Cuerpo_reg : '{' Declaraciones_reg '}'
+
+  13  Declaraciones_reg : Declaraciones_reg Declaracion_unit
+  14                    | Declaracion_unit
+
+  15  Declaracion_unit : Tipo ID ';'
+
+  16  Tipo : ENTERO
+  17       | ENTEROL
+
+  18  Lista_var : Lista_var ',' ID
+  19            | ID
+
+  20  Declaracion_var : Tipo Lista_var ';'
+
+  21  $$2 :
+
+  22  Declaracion_var : ID $$2 Lista_var ';'
+
+  23  Sentencias : Sentencias Sentencia
+  24             | Sentencia
+
+  25  Sentencia : Asignacion
+  26            | Seleccion
+  27            | Iteracion
+  28            | Salida
+  29            | error
+
+  30  Asignacion : AsignacionIzq ASIGN Expresion ';'
+
+  31  $$3 :
+
+  32  Asignacion : AsignacionIzq ASIGN Expresion error $$3 ';'
+
+  33  AsignacionIzq : ID
+  34                | CampoReg
+
+  35  Expresion : Expresion '+' Termino
+  36            | Expresion '-' Termino
+  37            | Termino
+
+  38  Termino : Termino '*' Factor
+  39          | Termino '/' Factor
+  40          | Factor
+
+  41  Factor : ID
+  42         | CTE
+  43         | CampoReg
+  44         | CTENeg
+
+  45  CTENeg : '-' CTE
+
+  46  CampoReg : ID '.' ID
+
+  47  Seleccion : CabeceraSi BloqueEntonces SINO BloqueSino
+  48            | CabeceraSi SINO BloqueSino
+  49            | CabeceraSi BloqueEntonces
+
+  50  CabeceraSi : SI '(' Comparacion ')' ENTONCES
+
+  51  $$4 :
+
+  52  CabeceraSi : SI '(' error $$4 ')' ENTONCES
+  53             | SI Comparacion ')' ENTONCES
+  54             | SI '(' Comparacion ENTONCES
+  55             | SI '(' Comparacion ')'
+
+  56  Comparacion : Expresion COMP Expresion
+
+  57  BloqueEntonces : Sentencia
+  58                 | BloqueSentencias
+
+  59  BloqueSentencias : '{' Sentencias '}'
+
+  60  BloqueSino : BloqueSentencias
+  61             | Sentencia
+
+  62  Iteracion : CabeceraIteracion BloqueIteracion
+
+  63  CabeceraIteracion : MIENTRAS '(' Comparacion ')' ITERAR
+  64                    | MIENTRAS Comparacion ')' ITERAR
+
+  65  $$5 :
+
+  66  CabeceraIteracion : MIENTRAS '(' error $$5 ')' ITERAR
+  67                    | MIENTRAS '(' Comparacion ITERAR
+
+  68  $$6 :
+
+  69  CabeceraIteracion : MIENTRAS '(' Comparacion ')' $$6 ';'
+
+  70  BloqueIteracion : Sentencia
+  71                  | BloqueSentencias
+
+  72  Salida : IMPRIMIR '(' STR ')' ';'
+
+  73  $$7 :
+
+  74  Salida : IMPRIMIR '(' error $$7 ')' ';'
+  75         | IMPRIMIR '(' STR ')' error
+
+state 0
+	$accept : . Programa $end  (0)
+
+	ID  shift 1
+	REGISTRO  shift 2
+	ENTERO  shift 3
+	ENTEROL  shift 4
+	.  error
+
+	Programa  goto 5
+	Declaraciones  goto 6
+	Declaracion  goto 7
+	Declaracion_reg  goto 8
+	Declaracion_var  goto 9
+	Tipo  goto 10
+
+
+state 1
+	Declaracion_var : ID . $$2 Lista_var ';'  (22)
+	$$2 : .  (21)
+
+	.  reduce 21
+
+	$$2  goto 11
+
+
+state 2
+	Declaracion_reg : REGISTRO . Cuerpo_reg Lista_var_reg ';'  (7)
+	Declaracion_reg : REGISTRO . error $$1 Lista_var_reg ';'  (9)
+
+	error  shift 12
+	'{'  shift 13
+	.  error
+
+	Cuerpo_reg  goto 14
+
+
+state 3
+	Tipo : ENTERO .  (16)
+
+	.  reduce 16
+
+
+state 4
+	Tipo : ENTEROL .  (17)
+
+	.  reduce 17
+
+
+state 5
+	$accept : Programa . $end  (0)
+
+	$end  accept
+
+
+state 6
+	Programa : Declaraciones . Sentencias  (1)
+	Programa : Declaraciones .  (2)
+	Declaraciones : Declaraciones . Declaracion  (3)
+
+	error  shift 15
+	ID  shift 16
+	REGISTRO  shift 2
+	ENTERO  shift 3
+	ENTEROL  shift 4
+	SI  shift 17
+	MIENTRAS  shift 18
+	IMPRIMIR  shift 19
+	$end  reduce 2
+
+	Sentencias  goto 20
+	Declaracion  goto 21
+	Declaracion_reg  goto 8
+	Declaracion_var  goto 9
+	Tipo  goto 10
+	Sentencia  goto 22
+	Asignacion  goto 23
+	Seleccion  goto 24
+	Iteracion  goto 25
+	Salida  goto 26
+	AsignacionIzq  goto 27
+	CampoReg  goto 28
+	CabeceraSi  goto 29
+	CabeceraIteracion  goto 30
+
+
+state 7
+	Declaraciones : Declaracion .  (4)
+
+	.  reduce 4
+
+
+state 8
+	Declaracion : Declaracion_reg .  (5)
+
+	.  reduce 5
+
+
+state 9
+	Declaracion : Declaracion_var .  (6)
+
+	.  reduce 6
+
+
+state 10
+	Declaracion_var : Tipo . Lista_var ';'  (20)
+
+	ID  shift 31
+	.  error
+
+	Lista_var  goto 32
+
+
+state 11
+	Declaracion_var : ID $$2 . Lista_var ';'  (22)
+
+	ID  shift 31
+	.  error
+
+	Lista_var  goto 33
+
+
+state 12
+	Declaracion_reg : REGISTRO error . $$1 Lista_var_reg ';'  (9)
+	$$1 : .  (8)
+
+	.  reduce 8
+
+	$$1  goto 34
+
+
+state 13
+	Cuerpo_reg : '{' . Declaraciones_reg '}'  (12)
+
+	ENTERO  shift 3
+	ENTEROL  shift 4
+	.  error
+
+	Declaraciones_reg  goto 35
+	Declaracion_unit  goto 36
+	Tipo  goto 37
+
+
+state 14
+	Declaracion_reg : REGISTRO Cuerpo_reg . Lista_var_reg ';'  (7)
+
+	ID  shift 38
+	.  error
+
+	Lista_var_reg  goto 39
+
+
+state 15
+	Sentencia : error .  (29)
+
+	.  reduce 29
+
+
+state 16
+	Declaracion_var : ID . $$2 Lista_var ';'  (22)
+	AsignacionIzq : ID .  (33)
+	CampoReg : ID . '.' ID  (46)
+	$$2 : .  (21)
+
+	'.'  shift 40
+	ID  reduce 21
+	ASIGN  reduce 33
+
+	$$2  goto 11
+
+
+state 17
+	CabeceraSi : SI . '(' Comparacion ')' ENTONCES  (50)
+	CabeceraSi : SI . '(' error $$4 ')' ENTONCES  (52)
+	CabeceraSi : SI . Comparacion ')' ENTONCES  (53)
+	CabeceraSi : SI . '(' Comparacion ENTONCES  (54)
+	CabeceraSi : SI . '(' Comparacion ')'  (55)
+
+	ID  shift 41
+	CTE  shift 42
+	'-'  shift 43
+	'('  shift 44
+	.  error
+
+	Expresion  goto 45
+	CampoReg  goto 46
+	Termino  goto 47
+	Factor  goto 48
+	CTENeg  goto 49
+	Comparacion  goto 50
+
+
+state 18
+	CabeceraIteracion : MIENTRAS . '(' Comparacion ')' ITERAR  (63)
+	CabeceraIteracion : MIENTRAS . Comparacion ')' ITERAR  (64)
+	CabeceraIteracion : MIENTRAS . '(' error $$5 ')' ITERAR  (66)
+	CabeceraIteracion : MIENTRAS . '(' Comparacion ITERAR  (67)
+	CabeceraIteracion : MIENTRAS . '(' Comparacion ')' $$6 ';'  (69)
+
+	ID  shift 41
+	CTE  shift 42
+	'-'  shift 43
+	'('  shift 51
+	.  error
+
+	Expresion  goto 45
+	CampoReg  goto 46
+	Termino  goto 47
+	Factor  goto 48
+	CTENeg  goto 49
+	Comparacion  goto 52
+
+
+state 19
+	Salida : IMPRIMIR . '(' STR ')' ';'  (72)
+	Salida : IMPRIMIR . '(' error $$7 ')' ';'  (74)
+	Salida : IMPRIMIR . '(' STR ')' error  (75)
+
+	'('  shift 53
+	.  error
+
+
+state 20
+	Programa : Declaraciones Sentencias .  (1)
+	Sentencias : Sentencias . Sentencia  (23)
+
+	error  shift 15
+	ID  shift 54
+	SI  shift 17
+	MIENTRAS  shift 18
+	IMPRIMIR  shift 19
+	$end  reduce 1
+
+	Sentencia  goto 55
+	Asignacion  goto 23
+	Seleccion  goto 24
+	Iteracion  goto 25
+	Salida  goto 26
+	AsignacionIzq  goto 27
+	CampoReg  goto 28
+	CabeceraSi  goto 29
+	CabeceraIteracion  goto 30
+
+
+state 21
+	Declaraciones : Declaraciones Declaracion .  (3)
+
+	.  reduce 3
+
+
+state 22
+	Sentencias : Sentencia .  (24)
+
+	.  reduce 24
+
+
+state 23
+	Sentencia : Asignacion .  (25)
+
+	.  reduce 25
+
+
+state 24
+	Sentencia : Seleccion .  (26)
+
+	.  reduce 26
+
+
+state 25
+	Sentencia : Iteracion .  (27)
+
+	.  reduce 27
+
+
+state 26
+	Sentencia : Salida .  (28)
+
+	.  reduce 28
+
+
+state 27
+	Asignacion : AsignacionIzq . ASIGN Expresion ';'  (30)
+	Asignacion : AsignacionIzq . ASIGN Expresion error $$3 ';'  (32)
+
+	ASIGN  shift 56
+	.  error
+
+
+state 28
+	AsignacionIzq : CampoReg .  (34)
+
+	.  reduce 34
+
+
+state 29
+	Seleccion : CabeceraSi . BloqueEntonces SINO BloqueSino  (47)
+	Seleccion : CabeceraSi . SINO BloqueSino  (48)
+	Seleccion : CabeceraSi . BloqueEntonces  (49)
+
+	error  shift 15
+	ID  shift 54
+	SI  shift 17
+	SINO  shift 57
+	MIENTRAS  shift 18
+	IMPRIMIR  shift 19
+	'{'  shift 58
+	.  error
+
+	Sentencia  goto 59
+	Asignacion  goto 23
+	Seleccion  goto 24
+	Iteracion  goto 25
+	Salida  goto 26
+	AsignacionIzq  goto 27
+	CampoReg  goto 28
+	CabeceraSi  goto 29
+	BloqueEntonces  goto 60
+	BloqueSentencias  goto 61
+	CabeceraIteracion  goto 30
+
+
+state 30
+	Iteracion : CabeceraIteracion . BloqueIteracion  (62)
+
+	error  shift 15
+	ID  shift 54
+	SI  shift 17
+	MIENTRAS  shift 18
+	IMPRIMIR  shift 19
+	'{'  shift 58
+	.  error
+
+	Sentencia  goto 62
+	Asignacion  goto 23
+	Seleccion  goto 24
+	Iteracion  goto 25
+	Salida  goto 26
+	AsignacionIzq  goto 27
+	CampoReg  goto 28
+	CabeceraSi  goto 29
+	BloqueSentencias  goto 63
+	CabeceraIteracion  goto 30
+	BloqueIteracion  goto 64
+
+
+state 31
+	Lista_var : ID .  (19)
+
+	.  reduce 19
+
+
+state 32
+	Lista_var : Lista_var . ',' ID  (18)
+	Declaracion_var : Tipo Lista_var . ';'  (20)
+
+	';'  shift 65
+	','  shift 66
+	.  error
+
+
+state 33
+	Lista_var : Lista_var . ',' ID  (18)
+	Declaracion_var : ID $$2 Lista_var . ';'  (22)
+
+	';'  shift 67
+	','  shift 66
+	.  error
+
+
+state 34
+	Declaracion_reg : REGISTRO error $$1 . Lista_var_reg ';'  (9)
+
+	ID  shift 38
+	.  error
+
+	Lista_var_reg  goto 68
+
+
+state 35
+	Cuerpo_reg : '{' Declaraciones_reg . '}'  (12)
+	Declaraciones_reg : Declaraciones_reg . Declaracion_unit  (13)
+
+	ENTERO  shift 3
+	ENTEROL  shift 4
+	'}'  shift 69
+	.  error
+
+	Declaracion_unit  goto 70
+	Tipo  goto 37
+
+
+state 36
+	Declaraciones_reg : Declaracion_unit .  (14)
+
+	.  reduce 14
+
+
+state 37
+	Declaracion_unit : Tipo . ID ';'  (15)
+
+	ID  shift 71
+	.  error
+
+
+state 38
+	Lista_var_reg : ID .  (11)
+
+	.  reduce 11
+
+
+state 39
+	Declaracion_reg : REGISTRO Cuerpo_reg Lista_var_reg . ';'  (7)
+	Lista_var_reg : Lista_var_reg . ',' ID  (10)
+
+	';'  shift 72
+	','  shift 73
+	.  error
+
+
+state 40
+	CampoReg : ID '.' . ID  (46)
+
+	ID  shift 74
+	.  error
+
+
+state 41
+	Factor : ID .  (41)
+	CampoReg : ID . '.' ID  (46)
+
+	'.'  shift 40
+	error  reduce 41
+	COMP  reduce 41
+	ENTONCES  reduce 41
+	ITERAR  reduce 41
+	'+'  reduce 41
+	'-'  reduce 41
+	'/'  reduce 41
+	'*'  reduce 41
+	';'  reduce 41
+	')'  reduce 41
+
+
+state 42
+	Factor : CTE .  (42)
+
+	.  reduce 42
+
+
+state 43
+	CTENeg : '-' . CTE  (45)
+
+	CTE  shift 75
+	.  error
+
+
+state 44
+	CabeceraSi : SI '(' . Comparacion ')' ENTONCES  (50)
+	CabeceraSi : SI '(' . error $$4 ')' ENTONCES  (52)
+	CabeceraSi : SI '(' . Comparacion ENTONCES  (54)
+	CabeceraSi : SI '(' . Comparacion ')'  (55)
+
+	error  shift 76
+	ID  shift 41
+	CTE  shift 42
+	'-'  shift 43
+	.  error
+
+	Expresion  goto 45
+	CampoReg  goto 46
+	Termino  goto 47
+	Factor  goto 48
+	CTENeg  goto 49
+	Comparacion  goto 77
+
+
+state 45
+	Expresion : Expresion . '+' Termino  (35)
+	Expresion : Expresion . '-' Termino  (36)
+	Comparacion : Expresion . COMP Expresion  (56)
+
+	COMP  shift 78
+	'+'  shift 79
+	'-'  shift 80
+	.  error
+
+
+state 46
+	Factor : CampoReg .  (43)
+
+	.  reduce 43
+
+
+state 47
+	Expresion : Termino .  (37)
+	Termino : Termino . '*' Factor  (38)
+	Termino : Termino . '/' Factor  (39)
+
+	'/'  shift 81
+	'*'  shift 82
+	error  reduce 37
+	COMP  reduce 37
+	ENTONCES  reduce 37
+	ITERAR  reduce 37
+	'+'  reduce 37
+	'-'  reduce 37
+	';'  reduce 37
+	')'  reduce 37
+
+
+state 48
+	Termino : Factor .  (40)
+
+	.  reduce 40
+
+
+state 49
+	Factor : CTENeg .  (44)
+
+	.  reduce 44
+
+
+state 50
+	CabeceraSi : SI Comparacion . ')' ENTONCES  (53)
+
+	')'  shift 83
+	.  error
+
+
+state 51
+	CabeceraIteracion : MIENTRAS '(' . Comparacion ')' ITERAR  (63)
+	CabeceraIteracion : MIENTRAS '(' . error $$5 ')' ITERAR  (66)
+	CabeceraIteracion : MIENTRAS '(' . Comparacion ITERAR  (67)
+	CabeceraIteracion : MIENTRAS '(' . Comparacion ')' $$6 ';'  (69)
+
+	error  shift 84
+	ID  shift 41
+	CTE  shift 42
+	'-'  shift 43
+	.  error
+
+	Expresion  goto 45
+	CampoReg  goto 46
+	Termino  goto 47
+	Factor  goto 48
+	CTENeg  goto 49
+	Comparacion  goto 85
+
+
+state 52
+	CabeceraIteracion : MIENTRAS Comparacion . ')' ITERAR  (64)
+
+	')'  shift 86
+	.  error
+
+
+state 53
+	Salida : IMPRIMIR '(' . STR ')' ';'  (72)
+	Salida : IMPRIMIR '(' . error $$7 ')' ';'  (74)
+	Salida : IMPRIMIR '(' . STR ')' error  (75)
+
+	error  shift 87
+	STR  shift 88
+	.  error
+
+
+state 54
+	AsignacionIzq : ID .  (33)
+	CampoReg : ID . '.' ID  (46)
+
+	'.'  shift 40
+	ASIGN  reduce 33
+
+
+state 55
+	Sentencias : Sentencias Sentencia .  (23)
+
+	.  reduce 23
+
+
+state 56
+	Asignacion : AsignacionIzq ASIGN . Expresion ';'  (30)
+	Asignacion : AsignacionIzq ASIGN . Expresion error $$3 ';'  (32)
+
+	ID  shift 41
+	CTE  shift 42
+	'-'  shift 43
+	.  error
+
+	Expresion  goto 89
+	CampoReg  goto 46
+	Termino  goto 47
+	Factor  goto 48
+	CTENeg  goto 49
+
+
+state 57
+	Seleccion : CabeceraSi SINO . BloqueSino  (48)
+
+	error  shift 15
+	ID  shift 54
+	SI  shift 17
+	MIENTRAS  shift 18
+	IMPRIMIR  shift 19
+	'{'  shift 58
+	.  error
+
+	Sentencia  goto 90
+	Asignacion  goto 23
+	Seleccion  goto 24
+	Iteracion  goto 25
+	Salida  goto 26
+	AsignacionIzq  goto 27
+	CampoReg  goto 28
+	CabeceraSi  goto 29
+	BloqueSino  goto 91
+	BloqueSentencias  goto 92
+	CabeceraIteracion  goto 30
+
+
+state 58
+	BloqueSentencias : '{' . Sentencias '}'  (59)
+
+	error  shift 15
+	ID  shift 54
+	SI  shift 17
+	MIENTRAS  shift 18
+	IMPRIMIR  shift 19
+	.  error
+
+	Sentencias  goto 93
+	Sentencia  goto 22
+	Asignacion  goto 23
+	Seleccion  goto 24
+	Iteracion  goto 25
+	Salida  goto 26
+	AsignacionIzq  goto 27
+	CampoReg  goto 28
+	CabeceraSi  goto 29
+	CabeceraIteracion  goto 30
+
+
+state 59
+	BloqueEntonces : Sentencia .  (57)
+
+	.  reduce 57
+
+
+state 60
+	Seleccion : CabeceraSi BloqueEntonces . SINO BloqueSino  (47)
+	Seleccion : CabeceraSi BloqueEntonces .  (49)
+
+	SINO  shift 94
+	$end  reduce 49
+	error  reduce 49
+	ID  reduce 49
+	SI  reduce 49
+	MIENTRAS  reduce 49
+	IMPRIMIR  reduce 49
+	'}'  reduce 49
+
+
+state 61
+	BloqueEntonces : BloqueSentencias .  (58)
+
+	.  reduce 58
+
+
+state 62
+	BloqueIteracion : Sentencia .  (70)
+
+	.  reduce 70
+
+
+state 63
+	BloqueIteracion : BloqueSentencias .  (71)
+
+	.  reduce 71
+
+
+state 64
+	Iteracion : CabeceraIteracion BloqueIteracion .  (62)
+
+	.  reduce 62
+
+
+state 65
+	Declaracion_var : Tipo Lista_var ';' .  (20)
+
+	.  reduce 20
+
+
+state 66
+	Lista_var : Lista_var ',' . ID  (18)
+
+	ID  shift 95
+	.  error
+
+
+state 67
+	Declaracion_var : ID $$2 Lista_var ';' .  (22)
+
+	.  reduce 22
+
+
+state 68
+	Declaracion_reg : REGISTRO error $$1 Lista_var_reg . ';'  (9)
+	Lista_var_reg : Lista_var_reg . ',' ID  (10)
+
+	';'  shift 96
+	','  shift 73
+	.  error
+
+
+state 69
+	Cuerpo_reg : '{' Declaraciones_reg '}' .  (12)
+
+	.  reduce 12
+
+
+state 70
+	Declaraciones_reg : Declaraciones_reg Declaracion_unit .  (13)
+
+	.  reduce 13
+
+
+state 71
+	Declaracion_unit : Tipo ID . ';'  (15)
+
+	';'  shift 97
+	.  error
+
+
+state 72
+	Declaracion_reg : REGISTRO Cuerpo_reg Lista_var_reg ';' .  (7)
+
+	.  reduce 7
+
+
+state 73
+	Lista_var_reg : Lista_var_reg ',' . ID  (10)
+
+	ID  shift 98
+	.  error
+
+
+state 74
+	CampoReg : ID '.' ID .  (46)
+
+	.  reduce 46
+
+
+state 75
+	CTENeg : '-' CTE .  (45)
+
+	.  reduce 45
+
+
+state 76
+	CabeceraSi : SI '(' error . $$4 ')' ENTONCES  (52)
+	$$4 : .  (51)
+
+	.  reduce 51
+
+	$$4  goto 99
+
+
+state 77
+	CabeceraSi : SI '(' Comparacion . ')' ENTONCES  (50)
+	CabeceraSi : SI '(' Comparacion . ENTONCES  (54)
+	CabeceraSi : SI '(' Comparacion . ')'  (55)
+
+	ENTONCES  shift 100
+	')'  shift 101
+	.  error
+
+
+state 78
+	Comparacion : Expresion COMP . Expresion  (56)
+
+	ID  shift 41
+	CTE  shift 42
+	'-'  shift 43
+	.  error
+
+	Expresion  goto 102
+	CampoReg  goto 46
+	Termino  goto 47
+	Factor  goto 48
+	CTENeg  goto 49
+
+
+state 79
+	Expresion : Expresion '+' . Termino  (35)
+
+	ID  shift 41
+	CTE  shift 42
+	'-'  shift 43
+	.  error
+
+	CampoReg  goto 46
+	Termino  goto 103
+	Factor  goto 48
+	CTENeg  goto 49
+
+
+state 80
+	Expresion : Expresion '-' . Termino  (36)
+
+	ID  shift 41
+	CTE  shift 42
+	'-'  shift 43
+	.  error
+
+	CampoReg  goto 46
+	Termino  goto 104
+	Factor  goto 48
+	CTENeg  goto 49
+
+
+state 81
+	Termino : Termino '/' . Factor  (39)
+
+	ID  shift 41
+	CTE  shift 42
+	'-'  shift 43
+	.  error
+
+	CampoReg  goto 46
+	Factor  goto 105
+	CTENeg  goto 49
+
+
+state 82
+	Termino : Termino '*' . Factor  (38)
+
+	ID  shift 41
+	CTE  shift 42
+	'-'  shift 43
+	.  error
+
+	CampoReg  goto 46
+	Factor  goto 106
+	CTENeg  goto 49
+
+
+state 83
+	CabeceraSi : SI Comparacion ')' . ENTONCES  (53)
+
+	ENTONCES  shift 107
+	.  error
+
+
+state 84
+	CabeceraIteracion : MIENTRAS '(' error . $$5 ')' ITERAR  (66)
+	$$5 : .  (65)
+
+	.  reduce 65
+
+	$$5  goto 108
+
+
+state 85
+	CabeceraIteracion : MIENTRAS '(' Comparacion . ')' ITERAR  (63)
+	CabeceraIteracion : MIENTRAS '(' Comparacion . ITERAR  (67)
+	CabeceraIteracion : MIENTRAS '(' Comparacion . ')' $$6 ';'  (69)
+
+	ITERAR  shift 109
+	')'  shift 110
+	.  error
+
+
+state 86
+	CabeceraIteracion : MIENTRAS Comparacion ')' . ITERAR  (64)
+
+	ITERAR  shift 111
+	.  error
+
+
+state 87
+	Salida : IMPRIMIR '(' error . $$7 ')' ';'  (74)
+	$$7 : .  (73)
+
+	.  reduce 73
+
+	$$7  goto 112
+
+
+state 88
+	Salida : IMPRIMIR '(' STR . ')' ';'  (72)
+	Salida : IMPRIMIR '(' STR . ')' error  (75)
+
+	')'  shift 113
+	.  error
+
+
+state 89
+	Asignacion : AsignacionIzq ASIGN Expresion . ';'  (30)
+	Asignacion : AsignacionIzq ASIGN Expresion . error $$3 ';'  (32)
+	Expresion : Expresion . '+' Termino  (35)
+	Expresion : Expresion . '-' Termino  (36)
+
+	error  shift 114
+	'+'  shift 79
+	'-'  shift 80
+	';'  shift 115
+	.  error
+
+
+state 90
+	BloqueSino : Sentencia .  (61)
+
+	.  reduce 61
+
+
+state 91
+	Seleccion : CabeceraSi SINO BloqueSino .  (48)
+
+	.  reduce 48
+
+
+state 92
+	BloqueSino : BloqueSentencias .  (60)
+
+	.  reduce 60
+
+
+state 93
+	Sentencias : Sentencias . Sentencia  (23)
+	BloqueSentencias : '{' Sentencias . '}'  (59)
+
+	error  shift 15
+	ID  shift 54
+	SI  shift 17
+	MIENTRAS  shift 18
+	IMPRIMIR  shift 19
+	'}'  shift 116
+	.  error
+
+	Sentencia  goto 55
+	Asignacion  goto 23
+	Seleccion  goto 24
+	Iteracion  goto 25
+	Salida  goto 26
+	AsignacionIzq  goto 27
+	CampoReg  goto 28
+	CabeceraSi  goto 29
+	CabeceraIteracion  goto 30
+
+
+state 94
+	Seleccion : CabeceraSi BloqueEntonces SINO . BloqueSino  (47)
+
+	error  shift 15
+	ID  shift 54
+	SI  shift 17
+	MIENTRAS  shift 18
+	IMPRIMIR  shift 19
+	'{'  shift 58
+	.  error
+
+	Sentencia  goto 90
+	Asignacion  goto 23
+	Seleccion  goto 24
+	Iteracion  goto 25
+	Salida  goto 26
+	AsignacionIzq  goto 27
+	CampoReg  goto 28
+	CabeceraSi  goto 29
+	BloqueSino  goto 117
+	BloqueSentencias  goto 92
+	CabeceraIteracion  goto 30
+
+
+state 95
+	Lista_var : Lista_var ',' ID .  (18)
+
+	.  reduce 18
+
+
+state 96
+	Declaracion_reg : REGISTRO error $$1 Lista_var_reg ';' .  (9)
+
+	.  reduce 9
+
+
+state 97
+	Declaracion_unit : Tipo ID ';' .  (15)
+
+	.  reduce 15
+
+
+state 98
+	Lista_var_reg : Lista_var_reg ',' ID .  (10)
+
+	.  reduce 10
+
+
+state 99
+	CabeceraSi : SI '(' error $$4 . ')' ENTONCES  (52)
+
+	')'  shift 118
+	.  error
+
+
+state 100
+	CabeceraSi : SI '(' Comparacion ENTONCES .  (54)
+
+	.  reduce 54
+
+
+state 101
+	CabeceraSi : SI '(' Comparacion ')' . ENTONCES  (50)
+	CabeceraSi : SI '(' Comparacion ')' .  (55)
+
+	ENTONCES  shift 119
+	error  reduce 55
+	ID  reduce 55
+	SI  reduce 55
+	SINO  reduce 55
+	MIENTRAS  reduce 55
+	IMPRIMIR  reduce 55
+	'{'  reduce 55
+
+
+state 102
+	Expresion : Expresion . '+' Termino  (35)
+	Expresion : Expresion . '-' Termino  (36)
+	Comparacion : Expresion COMP Expresion .  (56)
+
+	'+'  shift 79
+	'-'  shift 80
+	ENTONCES  reduce 56
+	ITERAR  reduce 56
+	')'  reduce 56
+
+
+state 103
+	Expresion : Expresion '+' Termino .  (35)
+	Termino : Termino . '*' Factor  (38)
+	Termino : Termino . '/' Factor  (39)
+
+	'/'  shift 81
+	'*'  shift 82
+	error  reduce 35
+	COMP  reduce 35
+	ENTONCES  reduce 35
+	ITERAR  reduce 35
+	'+'  reduce 35
+	'-'  reduce 35
+	';'  reduce 35
+	')'  reduce 35
+
+
+state 104
+	Expresion : Expresion '-' Termino .  (36)
+	Termino : Termino . '*' Factor  (38)
+	Termino : Termino . '/' Factor  (39)
+
+	'/'  shift 81
+	'*'  shift 82
+	error  reduce 36
+	COMP  reduce 36
+	ENTONCES  reduce 36
+	ITERAR  reduce 36
+	'+'  reduce 36
+	'-'  reduce 36
+	';'  reduce 36
+	')'  reduce 36
+
+
+state 105
+	Termino : Termino '/' Factor .  (39)
+
+	.  reduce 39
+
+
+state 106
+	Termino : Termino '*' Factor .  (38)
+
+	.  reduce 38
+
+
+state 107
+	CabeceraSi : SI Comparacion ')' ENTONCES .  (53)
+
+	.  reduce 53
+
+
+state 108
+	CabeceraIteracion : MIENTRAS '(' error $$5 . ')' ITERAR  (66)
+
+	')'  shift 120
+	.  error
+
+
+state 109
+	CabeceraIteracion : MIENTRAS '(' Comparacion ITERAR .  (67)
+
+	.  reduce 67
+
+
+state 110
+	CabeceraIteracion : MIENTRAS '(' Comparacion ')' . ITERAR  (63)
+	CabeceraIteracion : MIENTRAS '(' Comparacion ')' . $$6 ';'  (69)
+	$$6 : .  (68)
+
+	ITERAR  shift 121
+	';'  reduce 68
+
+	$$6  goto 122
+
+
+state 111
+	CabeceraIteracion : MIENTRAS Comparacion ')' ITERAR .  (64)
+
+	.  reduce 64
+
+
+state 112
+	Salida : IMPRIMIR '(' error $$7 . ')' ';'  (74)
+
+	')'  shift 123
+	.  error
+
+
+state 113
+	Salida : IMPRIMIR '(' STR ')' . ';'  (72)
+	Salida : IMPRIMIR '(' STR ')' . error  (75)
+
+	error  shift 124
+	';'  shift 125
+	.  error
+
+
+state 114
+	Asignacion : AsignacionIzq ASIGN Expresion error . $$3 ';'  (32)
+	$$3 : .  (31)
+
+	.  reduce 31
+
+	$$3  goto 126
+
+
+state 115
+	Asignacion : AsignacionIzq ASIGN Expresion ';' .  (30)
+
+	.  reduce 30
+
+
+state 116
+	BloqueSentencias : '{' Sentencias '}' .  (59)
+
+	.  reduce 59
+
+
+state 117
+	Seleccion : CabeceraSi BloqueEntonces SINO BloqueSino .  (47)
+
+	.  reduce 47
+
+
+state 118
+	CabeceraSi : SI '(' error $$4 ')' . ENTONCES  (52)
+
+	ENTONCES  shift 127
+	.  error
+
+
+state 119
+	CabeceraSi : SI '(' Comparacion ')' ENTONCES .  (50)
+
+	.  reduce 50
+
+
+state 120
+	CabeceraIteracion : MIENTRAS '(' error $$5 ')' . ITERAR  (66)
+
+	ITERAR  shift 128
+	.  error
+
+
+state 121
+	CabeceraIteracion : MIENTRAS '(' Comparacion ')' ITERAR .  (63)
+
+	.  reduce 63
+
+
+state 122
+	CabeceraIteracion : MIENTRAS '(' Comparacion ')' $$6 . ';'  (69)
+
+	';'  shift 129
+	.  error
+
+
+state 123
+	Salida : IMPRIMIR '(' error $$7 ')' . ';'  (74)
+
+	';'  shift 130
+	.  error
+
+
+state 124
+	Salida : IMPRIMIR '(' STR ')' error .  (75)
+
+	.  reduce 75
+
+
+state 125
+	Salida : IMPRIMIR '(' STR ')' ';' .  (72)
+
+	.  reduce 72
+
+
+state 126
+	Asignacion : AsignacionIzq ASIGN Expresion error $$3 . ';'  (32)
+
+	';'  shift 131
+	.  error
+
+
+state 127
+	CabeceraSi : SI '(' error $$4 ')' ENTONCES .  (52)
+
+	.  reduce 52
+
+
+state 128
+	CabeceraIteracion : MIENTRAS '(' error $$5 ')' ITERAR .  (66)
+
+	.  reduce 66
+
+
+state 129
+	CabeceraIteracion : MIENTRAS '(' Comparacion ')' $$6 ';' .  (69)
+
+	.  reduce 69
+
+
+state 130
+	Salida : IMPRIMIR '(' error $$7 ')' ';' .  (74)
+
+	.  reduce 74
+
+
+state 131
+	Asignacion : AsignacionIzq ASIGN Expresion error $$3 ';' .  (32)
+
+	.  reduce 32
+
+
+29 terminals, 38 nonterminals
+76 grammar rules, 132 states

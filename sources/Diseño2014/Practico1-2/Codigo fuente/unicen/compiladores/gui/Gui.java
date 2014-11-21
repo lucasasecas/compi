@@ -1,8 +1,5 @@
 package unicen.compiladores.gui;
 
-import gc_Assembler.GeneradorAssembler;
-import gc_Assembler.NodoArbol;
-
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -213,8 +210,7 @@ public class Gui extends JFrame implements ActionListener, MouseListener{
 	private void run() {
 		if(!isDirty("Antes de ejectuar se debe guardar los cambios")){
 			this.reset();
-			NodoArbol nodo = parser.run(this.fileName);
-			GeneradorAssembler as = new GeneradorAssembler(tds, this.fileName+".asm", nodo);
+			parser.run(this.fileName);
 			tdsPnl.generateTable(tds);
 			tokensPnl.generateTable(parser.getTokens());
 			errorsPnl.generateTable(errorManager.getAllErrors());

@@ -873,11 +873,7 @@ case 25:
 break;
 case 26:
 //#line 102 "sintaxis.y"
-{nuevaSentencia(val_peek(0),"Sentencia 'si'");
-ParserVal a = val_peek(0); 
-yyval = a;
-
-}
+{nuevaSentencia(val_peek(0),"Sentencia 'si'"); yyval = val_peek(0);}
 break;
 case 27:
 //#line 103 "sintaxis.y"

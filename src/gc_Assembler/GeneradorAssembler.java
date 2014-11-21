@@ -12,8 +12,7 @@ import Utils.TuplaTablaSimbolos;
 public class GeneradorAssembler {
 	
 	Vector<String> intermedio;
-	Stack<String> pila;
-	Vector<Integer> labels;
+	Stack<Integer> labels;
 	int auxCounter = 0;
 	HashMap<String, String> messages = new HashMap<String, String>();
 	private String lastCmp;
@@ -21,17 +20,19 @@ public class GeneradorAssembler {
 	private boolean onMain = false;
 	TablaSimbolo _tds;
 	private PrintWriter archivo;
-	
-	public GeneradorAssembler(TablaSimbolo tds, String pathArchivo, String[] codigoIntermedio){
+	private NodoArbol raiz;
+	private int countLabels;
+		
+	public GeneradorAssembler(TablaSimbolo tds, String pathArchivo, NodoArbol nodo){
 		_tds = tds;
 		intermedio = new Vector<String>();
-		labels = new Vector<Integer>();
-		pila = new Stack<String>();
-		intermedio.addAll(Arrays.asList(codigoIntermedio));
+		labels = new Stack<Integer>();
+		raiz = nodo;
 		try{
 			this.archivo = new PrintWriter(pathArchivo);
 			this.generarEncabezados();
 			String codigo = generateCode();
+			System.out.println();
 			this.generarVariables();
 			archivo.println(codigo);
 			archivo.println("label_quit:");
@@ -40,6 +41,7 @@ public class GeneradorAssembler {
 		} catch(Exception e){
 			System.err.println("Imposible generar codigo assembler");
 		}
+		
 		archivo.close();
 	}
 	
@@ -63,255 +65,327 @@ public class GeneradorAssembler {
 		code += "label_div0Excp:"+'\n';
 		code += "invoke MessageBox, NULL, addr _error, addr _error, MB_OK"+'\n';
 		code += "JMP label_quit"+'\n';
-		this.procLabels();
+		code += "_start:"+'\n';
+//		this.procLabels();
 		this.procMessages();
-		int i = 0;
-		for( i=0; i<intermedio.size(); i++){
-			if(isLabel(i)){
-				code += "label_"+i+":"+'\n';
-			}
-			String val = intermedio.elementAt(i);
-			if(Arrays.asList(operators).contains(val)){
-				code += generateOperation(val);
-			}
-			else
-				pila.push(val);
-		}
-		if(isLabel(i)){
-			code += "label_"+i+":"+'\n';
-		}
+		code += procesarSentencia(raiz);
+//		int i = 0;
+//		for( i=0; i<intermedio.size(); i++){
+//			if(isLabel(i)){
+//				code += "label_"+i+":"+'\n';
+//			}
+//			String val = intermedio.elementAt(i);
+//			if(Arrays.asList(operators).contains(val)){
+//				code += generateOperation(val);
+//			}
+//			else
+//				pila.push(val);
+//		}
+//		if(isLabel(i)){
+//			code += "label_"+i+":"+'\n';
+//		}
 		
 		return code;
+	}
+
+	private String procesarSentencia(NodoArbol nodo) {
+		String codigo = "";
+		if(nodo==null || nodo.esHoja()) return "";
+		System.out.println(nodo.getValue());
+		if(nodo.getValue()=="S"){
+			codigo += procesarSentencia(nodo.getHijoDer());
+			codigo += procesarSentencia(nodo.getHijoIzq());
+			nodo.setHijoIzq(null);;
+			nodo.setHijoDer(null);
+		}else if(nodo.hijosHoja())
+			codigo += generateOperation(nodo)+'\n';
+			else{
+				codigo += procesarSentencia(nodo.getHijoIzq());
+				codigo += procesarSentencia(nodo.getHijoDer());
+				codigo += procesarSentencia(nodo);
+			}
+				
+		return codigo;
+		
 	}
 
 	private void procMessages() {
 		String code = "";
 		int count = 0;
 		for(TuplaTablaSimbolos tupla : _tds.values())
-			if(tupla._kind == 270){
+			if((Integer) tupla.getValue("clase") == 270){
 				int c = count++;
-				messages.put(tupla._value, "_message"+c);
+				String message = (String) tupla.getValue("valor");
+				messages.put(message, "_message"+c);
 			}
 	}
-
+//
 	private void generarVariables() {
 		
 		archivo.println(".data");
 		int count  = 0;
+		String tipoReg;
+		String prefix;
 		for(TuplaTablaSimbolos tupla : _tds.values()){
-			int kind = tupla._kind;
-			if(kind == 257){
-				if(tupla._use != null){
-					if(tupla._use.equals("Variable"))
-						archivo.println("_"+tupla._value+"	DW	0");
-				}
+			int kind =(Integer) tupla.getValue("clase");
+			if(tupla.getValue("tipo")!=null && kind != 262){
+				tipoReg = esEntero((String)tupla.getValue("valor"))?"DW":"DD";
+				prefix = ((String)tupla.getValue("valor")).startsWith("@")?"":"_";
+				archivo.println(prefix+(String)tupla.getValue("valor")+"	"+tipoReg+"	0");
+				continue;
 			}
-			if(kind == 300){
-				archivo.println(tupla._value+"	DW	0");
-			}
+			
 			if(kind == 270){
-				archivo.println(messages.get(tupla._value)+" db \""+ tupla._value +"\", 0");
+				
+				archivo.println(messages.get((String)tupla.getValue("valor"))+" db \""+ (String)tupla.getValue("valor")+"\", 0");
 			}
 		}
 		archivo.println("_error db \"No se puede dividir por cero\", 0");
 	}
+//
+//	private boolean isLabel(int i) {
+//		return labels.contains(new Integer(i));
+//		
+//	}
 
-	private boolean isLabel(int i) {
-		return labels.contains(new Integer(i));
-		
-	}
-
-	private String generateOperation(String op) {
+	private String generateOperation(NodoArbol nodo) {
 		String code = "";
 		String aux = "";
-		String arg1 = "";
-		String arg2 = "";
+		String arg1 = nodo.getHijoIzq()==null?"":nodo.getHijoIzq().getValue();
+		String arg2 = nodo.getHijoDer()==null?"":nodo.getHijoDer().getValue();
+		String reg;
+		String reg2;
+		String op = nodo.getValue();
+		boolean entero;
 		switch(op){
-		case "HEADER":
-			arg1 = pila.lastElement();
-			code += "func_"+arg1+":"+'\n';
-			break;
-		case "RETURN":
-			arg1 = procArgument(pila.pop());
-			arg2 = pila.lastElement();
-			code += "mov ax, "+arg1+'\n';
-			code += "ret"+'\n';
-			break;
 		case "+":
-			aux = generarAux();
-			arg2 = procArgument(pila.pop());
-			arg1 = procArgument(pila.pop());
-			code += "mov ax, "+arg1+'\n';
-			code += "add ax, "+arg2+'\n';
-			code += "mov "+aux+", ax"+'\n';
-			pila.push(aux);
+			aux = generarAux((String)(_tds.getTupla(arg1).getValue("tipo")));
+			reg = esEntero(arg1)?"ax":"eax";
+			arg1 = procArgument(arg1);
+			arg2 = procArgument(arg2);
+
+			code += "mov "+reg+", "+arg1+'\n';
+			code += "add "+reg+", "+arg2+'\n';
+			code += "mov "+aux+", "+reg+'\n';
+			nodo.setValue(aux);
+			nodo.setHijoIzq(null);
+			nodo.setHijoDer(null);
 			break;
 		case "-":
-			aux = generarAux();
-			arg2 = procArgument(pila.pop());
-			arg1 = procArgument(pila.pop());
-			code += "mov ax, "+arg1+'\n';
-			code += "sub ax, "+arg2+'\n';
-			code += "mov "+aux+", ax"+'\n';
-			pila.push(aux);
+			aux = generarAux((String)(_tds.getTupla(arg1).getValue("tipo")));
+			reg = esEntero(arg1)?"ax":"eax";
+			arg1 = procArgument(arg1);
+			arg2 = procArgument(arg2);
+			code += "mov "+reg+", "+arg1+'\n';
+			code += "sub "+reg+", "+arg2+'\n';
+			code += "mov "+aux+", "+reg+'\n';
+			nodo.setValue(aux);
+			nodo.setHijoIzq(null);
+			nodo.setHijoDer(null);
 			break;
 		case "*":
-			aux = generarAux();
-			arg2 = procArgument(pila.pop());
-			arg1 = procArgument(pila.pop());
-			code += "mov ax, "+arg1+'\n';
-			code += "mov dx, "+arg2+'\n';
-			code += "mul dx "+'\n';
-			code += "mov "+aux+", ax"+'\n';
-			pila.push(aux);
+			aux = generarAux((String)(_tds.getTupla(arg1).getValue("tipo")));
+			reg = esEntero(arg1)?"ax":"eax";
+			reg2 = esEntero(arg1)?"dx":"edx";
+			arg1 = procArgument(arg1);
+			arg2 = procArgument(arg2);
+			code += "mov "+reg+", "+arg1+'\n';
+			code += "mov "+reg2+", "+arg2+'\n';
+			code += "mul "+reg2+'\n';
+			code += "mov "+aux+", "+reg+'\n';
+			nodo.setValue(aux);
+			nodo.setHijoIzq(null);
+			nodo.setHijoDer(null);
 			break;
 		case "/":
-			aux = generarAux();
-			arg2 = procArgument(pila.pop());
-			arg1 = procArgument(pila.pop());
-			code += "mov dx, 0"+'\n';
-			code += "mov ax, "+arg1+'\n';
-//			code += "mov dx, "+arg1+'\n';
-			code += "cmp ax, 0"+'\n';
-			code +=  "JNE label_div0Excp"+'\n';
-			code += "div "+arg2+'\n';
-			code += "mov "+aux+", ax"+'\n';
-			pila.push(aux);
+			aux = generarAux((String)(_tds.getTupla(arg1).getValue("tipo")));
+			entero = esEntero(arg1); 
+			reg = entero?"ax":"eax";
+			reg2 = entero?"dx":"edx";
+			String reg3 = entero?"bx":"ebx";
+			arg1 = procArgument(arg1);
+			arg2 = procArgument(arg2);
+			code += "mov "+reg2+", 0"+'\n';
+			code += "mov "+reg+", "+arg1+'\n';
+			code += "mov "+reg3+", "+arg2+'\n';
+			code += "cmp "+reg3+", 0"+'\n';
+			code +=  "JE label_div0Excp"+'\n';
+			code += "div "+reg3+'\n';
+			code += "mov "+aux+", "+reg+'\n';
+			nodo.setValue(aux);
+			nodo.setHijoIzq(null);
+			nodo.setHijoDer(null);
 			break;
-		case "=":
-			arg2 = procArgument(pila.pop());
-			arg1 = procArgument(pila.pop());
-			code += "mov ax, "+arg2+'\n';
-			code += "mov "+arg1+", ax"+'\n';
-			break;
-		case "==":
-			this.lastCmp = op;
-			arg2 = procArgument(pila.pop());
-			arg1 = procArgument(pila.pop());
-			code += "mov ax, "+arg1+'\n';
-			code += "cmp ax,"+arg2+'\n';
-			break;
-		case "!=":
-			this.lastCmp = op;
-			arg2 = procArgument(pila.pop());
-			arg1 = procArgument(pila.pop());
-			code += "mov ax, "+arg1+'\n';
-			code += "cmp ax,"+arg2+'\n';
+		case ":=":
+			reg = esEntero(arg1)?"ax":"eax";
+			arg1 = procArgument(arg1);
+			arg2 = procArgument(arg2);
+			code += "mov "+reg+", "+arg2+'\n';
+			code += "mov "+arg1+", "+reg+'\n';
+			nodo.setHijoIzq(null);
+			nodo.setHijoDer(null);
 			break;
 		case "<":
 			this.lastCmp = op;
-			arg2 = procArgument(pila.pop());
-			arg1 = procArgument(pila.pop());
-			code += "mov ax, "+arg1+'\n';
-			code += "cmp ax,"+arg2+'\n';
+			entero = esEntero(arg1); 
+			reg = entero?"ax":"eax";
+			arg1 = procArgument(arg1);
+			arg2 = procArgument(arg2);
+			code += "mov "+reg+", "+arg1+'\n';
+			code += "cmp "+reg+","+arg2+'\n';
+			nodo.setHijoIzq(null);
+			nodo.setHijoDer(null);
 			break;
 		case ">":
 			this.lastCmp = op;
-			arg2 = procArgument(pila.pop());
-			arg1 = procArgument(pila.pop());
-			code += "mov ax, "+arg1+'\n';
-			code += "cmp ax,"+arg2+'\n';
+			entero = esEntero(arg1); 
+			reg = entero?"ax":"eax";
+			arg1 = procArgument(arg1);
+			arg2 = procArgument(arg2);
+			code += "mov "+reg+", "+arg1+'\n';
+			code += "cmp "+reg+","+arg2+'\n';
+			nodo.setHijoIzq(null);
+			nodo.setHijoDer(null);
+			break;
+		case ">=":
+			this.lastCmp = op;
+			entero = esEntero(arg1); 
+			reg = entero?"ax":"eax";
+			arg1 = procArgument(arg1);
+			arg2 = procArgument(arg2);
+			code += "mov "+reg+", "+arg1+'\n';
+			code += "cmp "+reg+","+arg2+'\n';
+			nodo.setHijoIzq(null);
+			nodo.setHijoDer(null);
 			break;
 		case "<=":
 			this.lastCmp = op;
-			arg2 = procArgument(pila.pop());
-			arg1 = procArgument(pila.pop());
-			code += "mov ax, "+arg1+'\n';
-			code += "cmp ax,"+arg2+'\n';
+			entero = esEntero(arg1); 
+			reg = entero?"ax":"eax";
+			arg1 = procArgument(arg1);
+			arg2 = procArgument(arg2);
+			code += "mov "+reg+", "+arg1+'\n';
+			code += "cmp "+reg+","+arg2+'\n';
+			nodo.setHijoIzq(null);
+			nodo.setHijoDer(null);
 			break;
-		case ">=":
-			this.lastCmp = op; 
-			arg2 = procArgument(pila.pop());
-			arg1 = procArgument(pila.pop());
-			code += "mov ax, "+arg1+'\n';
-			code += "cmp ax,"+arg2+'\n';
+		case "=":
+			this.lastCmp = op;
+			entero = esEntero(arg1); 
+			reg = entero?"ax":"eax";
+			arg1 = procArgument(arg1);
+			arg2 = procArgument(arg2);
+			code += "mov "+reg+", "+arg1+'\n';
+			code += "cmp "+reg+","+arg2+'\n';
+			nodo.setHijoIzq(null);
+			nodo.setHijoDer(null);
 			break;
-		case "BF":
-			arg1 = pila.pop();
-			
+		case "^=":
+			this.lastCmp = op;
+			entero = esEntero(arg1); 
+			reg = entero?"ax":"eax";
+			arg1 = procArgument(arg1);
+			arg2 = procArgument(arg2);
+			code += "mov "+reg+", "+arg1+'\n';
+			code += "cmp "+reg+","+arg2+'\n';
+			nodo.setHijoIzq(null);
+			nodo.setHijoDer(null);
+			nodo=null;
+			break;
+		case "CONDICION":
+			int actual = apiloLabel();
 			if (this.lastCmp.equals("<"))
-				 code += "JGE label_" + arg1+'\n';
+				 code += "JGE label_" + actual+'\n';
 			if ( this.lastCmp.equals(">") )
-				code += "JLE label_" +arg1+'\n';
+				code += "JLE label_" +actual+'\n';
 			if ( this.lastCmp.equals("<=") )
-				code +=  "JG label_" + arg1+'\n';
+				code +=  "JG label_" + actual+'\n';
 			if ( this.lastCmp.equals(">=") )
-				code +=  "JL label_" + arg1+'\n';
-			if ( this.lastCmp.equals("!=") )
-				code +=  "JE label_" + arg1+'\n';
-			if ( this.lastCmp.equals("==") )
-				code +=  "JNE label_" + arg1+'\n';
+				code +=  "JL label_" + actual+'\n';
+			if ( this.lastCmp.equals("^=") )
+				code +=  "JE label_" + actual+'\n';
+			if ( this.lastCmp.equals("=") )
+				code +=  "JNE label_" + actual+'\n';
+			nodo.setHijoIzq(null);
 			break;
-		case "BI":
-			arg1 = pila.pop();
-			code += "jmp label_" + arg1+'\n';
+		case "ENTONCES":
+			int viejo = desapiloLabel();
+			int nuevo = apiloLabel();
+			code += "JMP label_" + nuevo+'\n';
+			code += "label_"+viejo+":\n";
+			nodo.setHijoIzq(null);
 			break;
-		case "PRINT":
-			arg1 = procArgument(pila.pop());
+		case "CUERPO":
+			code+="label_"+desapiloLabel()+":\n";
+			nodo.setHijoIzq(null);
+			nodo.setHijoDer(null);
+			break;
+		case "IMPRIMIR":
+			arg1 = procArgument(arg1);
 			code += "invoke MessageBox, NULL, addr "+arg1+", addr "+arg1+", MB_OK"+'\n';
+			nodo.setHijoDer(null);
+			nodo.setHijoIzq(null);
 			break;
-		case "CALL":
-			arg1 = pila.pop();
-			code += "call func_"+arg1+'\n';
-			pila.push("ax");
+		default:
+			nodo.setHijoDer(null);
+			nodo.setHijoIzq(null);
 			break;
-		case ":":
-			arg1 = pila.pop();
-			code += "mov ax, 0"+'\n';
-			code += "ret"+'\n';
-			break;
-		case "MAIN":
-			onMain = true;
-			code += "_start:"+'\n';
 		}
+		
 		return code;
 		
 		
 	}
 
-	private String generarAux() {
+	private int apiloLabel() {
+		
+		labels.push(new Integer(++countLabels));
+		return countLabels;
+	}
+
+	private int desapiloLabel() {
+		return labels.pop();
+	
+	}
+
+	private boolean esEntero(String arg1) {
+		TuplaTablaSimbolos tupla = _tds.getTupla(arg1);
+		return tupla!=null && ((String)tupla.getValue("tipo")).equals("entero");
+	}
+
+	private String generarAux(String tipo) {
 		String aux = "@aux"+auxCounter++;
 		TuplaTablaSimbolos tupla = new TuplaTablaSimbolos(aux);
-		tupla._kind = 300;
+		tupla.setValue("clase",300);
+		if(tipo!=null){
+			tupla.setValue("tipo",tipo);
+		}
 		_tds.addTupla(tupla);
 		return aux;
 	}
 
-	private void procLabels(){
-		for(int i = 0; i<intermedio.size(); i++){
-			String l = intermedio.get(i);
-			if(l.startsWith("#") && l.endsWith("#")){
-				String sVal = l.substring(1, l.length() - 1);
-				intermedio.set(i, sVal);
-				Integer val = new Integer(sVal);
-				labels.add(val);
-			}
-		}
-			
-	}
 	
 	private String procArgument(String arg){
 		if(arg.equals("ax")){
 			return arg;
 		}
 		TuplaTablaSimbolos tupla = _tds.getTupla(arg);
-		if(tupla._kind == 300 || tupla._kind == 263){
+		int kind = (Integer) tupla.getValue("clase");
+		if(kind == 300 || kind == 262){
 			return arg;
 		}
-		if(tupla._kind == 257){
-			return onMain? "_" + arg : "_" + arg + "_f";	
+		if(kind == 257){
+			return "_" + arg;	
 		}
-		if(tupla._kind == 270){
-			return messages.get(tupla._value);
+		if(kind==270){
+			return messages.get(arg);
 		}
-		
-		
 		return null;
 	}
-
-	public boolean hayErrores() {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
+//
+//	public boolean hayErrores() {
+//		// TODO Auto-generated method stub
+//		return false;
+//	}
+//
 }
