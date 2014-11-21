@@ -297,7 +297,7 @@ Iteracion: CabeceraIteracion BloqueIteracion {
 			}
 	; 
 CabeceraIteracion: MIENTRAS '(' Comparacion ')' ITERAR {
-						NodoArbol nodoCond = crearNodo("CONDICION", $3.sref, null);
+						NodoArbol nodoCond = crearNodo("CONDICION_IT", $3.sref, null);
 						NodoArbol nodoIt = crearNodo("ITERACION", nodoCond, null);
 						$$ = $1;
 						$$.sref = nodoIt;

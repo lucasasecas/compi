@@ -100,6 +100,9 @@ public class GeneradorAssembler {
 		}else if(nodo.hijosHoja())
 			codigo += generateOperation(nodo)+'\n';
 			else{
+				if(nodo.getValue().equals("CONDICION_IT")){
+					codigo+= "label_"+apiloLabel()+":\n";
+				}
 				codigo += procesarSentencia(nodo.getHijoIzq());
 				codigo += procesarSentencia(nodo.getHijoDer());
 				codigo += procesarSentencia(nodo);
@@ -119,7 +122,7 @@ public class GeneradorAssembler {
 				messages.put(message, "_message"+c);
 			}
 	}
-//
+
 	private void generarVariables() {
 		
 		archivo.println(".data");
@@ -308,6 +311,22 @@ public class GeneradorAssembler {
 				code +=  "JNE label_" + actual+'\n';
 			nodo.setHijoIzq(null);
 			break;
+		case "CONDICION_IT":
+			int actual2 = apiloLabel();
+			if (this.lastCmp.equals("<"))
+				 code += "JGE label_" + actual2+'\n';
+			if ( this.lastCmp.equals(">") )
+				code += "JLE label_" +actual2+'\n';
+			if ( this.lastCmp.equals("<=") )
+				code +=  "JG label_" + actual2+'\n';
+			if ( this.lastCmp.equals(">=") )
+				code +=  "JL label_" + actual2+'\n';
+			if ( this.lastCmp.equals("^=") )
+				code +=  "JE label_" + actual2+'\n';
+			if ( this.lastCmp.equals("=") )
+				code +=  "JNE label_" + actual2+'\n';
+			nodo.setHijoIzq(null);
+			break;
 		case "ENTONCES":
 			int viejo = desapiloLabel();
 			int nuevo = apiloLabel();
@@ -319,6 +338,13 @@ public class GeneradorAssembler {
 			code+="label_"+desapiloLabel()+":\n";
 			nodo.setHijoIzq(null);
 			nodo.setHijoDer(null);
+			break;
+		case "CUERPO_IT":
+			int viejo2 = desapiloLabel();
+			int nuevo2 = desapiloLabel();
+			code += "JMP label_" + nuevo2+'\n';
+			code += "label_"+viejo2+":\n";
+			nodo.setHijoIzq(null);
 			break;
 		case "IMPRIMIR":
 			arg1 = procArgument(arg1);

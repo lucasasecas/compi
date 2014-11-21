@@ -611,7 +611,7 @@ private NodoArbol crearNodo(String val, NodoArbol izq, NodoArbol der) {
 }
 
 private void checkTypes(ParserVal val1, ParserVal val2) {
-	if(val1.type != val2.type){
+	if(!val1.type.equals(val2.type)){
 		errorManager.addError(new ParserError("No se permiten operaciones o asignaciones "
 				+ "entre elementos de distinto tipo", ParserError.TYPE_SINTACTICO, val1.row, false));
 	}
@@ -1141,7 +1141,7 @@ break;
 case 62:
 //#line 291 "sintaxis.y"
 {
-				NodoArbol nodoCpo = crearNodo("CUERPO", val_peek(0).sref, null);
+				NodoArbol nodoCpo = crearNodo("CUERPO_IT", val_peek(0).sref, null);
 				yyval.row = val_peek(1).row;
 				yyval.sval = val_peek(1).sval;
 				yyval.sref = val_peek(1).sref;
@@ -1151,7 +1151,7 @@ break;
 case 63:
 //#line 299 "sintaxis.y"
 {
-						NodoArbol nodoCond = crearNodo("CONDICION", val_peek(2).sref, null);
+						NodoArbol nodoCond = crearNodo("CONDICION_IT", val_peek(2).sref, null);
 						NodoArbol nodoIt = crearNodo("ITERACION", nodoCond, null);
 						yyval = val_peek(4);
 						yyval.sref = nodoIt;
