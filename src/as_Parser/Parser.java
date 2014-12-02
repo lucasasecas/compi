@@ -434,12 +434,12 @@ final static String yyrule[] = {
 "Salida : IMPRIMIR '(' STR ')' error",
 };
 
-//#line 325 "sintaxis.y"
+//#line 331 "sintaxis.y"
 Vector<NodoArbol> sentencias;
 TablaSimbolo tds;
 AnalizadorLexico al;
 Vector<ParserVal> tokens = new Vector<ParserVal>();
-ErrorManager errorManager;
+public ErrorManager errorManager;
 SentenciaManager sentenciasManager;
 public static double MAX = Math.pow(2, 15)-1; 
 NodoArbol raiz;
@@ -873,11 +873,7 @@ case 25:
 break;
 case 26:
 //#line 102 "sintaxis.y"
-{nuevaSentencia(val_peek(0),"Sentencia 'si'");
-ParserVal a = val_peek(0); 
-yyval = a;
-
-}
+{nuevaSentencia(val_peek(0),"Sentencia 'si'"); yyval = val_peek(0);}
 break;
 case 27:
 //#line 103 "sintaxis.y"
@@ -913,8 +909,16 @@ case 33:
 			yyval.sref = crearHoja(yyval.sval);
 	}
 break;
+case 34:
+//#line 121 "sintaxis.y"
+{
+		yyval.sval= val_peek(0).sval;
+		yyval.row = val_peek(0).row;
+		yyval.sref = val_peek(0).sref;
+	}
+break;
 case 35:
-//#line 123 "sintaxis.y"
+//#line 127 "sintaxis.y"
 {
 			checkTypes(val_peek(2), val_peek(0));
 			NodoArbol nodo = crearNodo("+", val_peek(2).sref, val_peek(0).sref);
@@ -925,7 +929,7 @@ case 35:
 		}
 break;
 case 36:
-//#line 131 "sintaxis.y"
+//#line 135 "sintaxis.y"
 {
 			checkTypes(val_peek(2), val_peek(0));
 			NodoArbol nodo = crearNodo("-", val_peek(2).sref, val_peek(0).sref);
@@ -936,7 +940,7 @@ case 36:
 		}
 break;
 case 37:
-//#line 139 "sintaxis.y"
+//#line 143 "sintaxis.y"
 {
 			yyval.sval=val_peek(0).sval;
 			yyval.row = val_peek(0).row;
@@ -945,7 +949,7 @@ case 37:
 		}
 break;
 case 38:
-//#line 147 "sintaxis.y"
+//#line 151 "sintaxis.y"
 {
 			checkTypes(val_peek(2), val_peek(0));
 			NodoArbol nodo = crearNodo("*", val_peek(2).sref, val_peek(0).sref);
@@ -956,7 +960,7 @@ case 38:
 		}
 break;
 case 39:
-//#line 155 "sintaxis.y"
+//#line 159 "sintaxis.y"
 {
 			checkTypes(val_peek(2), val_peek(0));
 			NodoArbol nodo = crearNodo("/", val_peek(2).sref, val_peek(0).sref);
@@ -967,7 +971,7 @@ case 39:
 		}
 break;
 case 40:
-//#line 163 "sintaxis.y"
+//#line 167 "sintaxis.y"
 {
 			yyval.sval=val_peek(0).sval;
 			yyval.row = val_peek(0).row;
@@ -976,7 +980,7 @@ case 40:
 	}
 break;
 case 41:
-//#line 170 "sintaxis.y"
+//#line 174 "sintaxis.y"
 {
 				TuplaTablaSimbolos tupla = tds.getTupla(val_peek(0).sval);
 				if (tupla==null || tupla.getValue("uso") == null){
@@ -994,7 +998,7 @@ case 41:
 		    }
 break;
 case 42:
-//#line 185 "sintaxis.y"
+//#line 189 "sintaxis.y"
 {
 				verificarRango(val_peek(0).sval, val_peek(0).row);
 				yyval.sval=val_peek(0).sval;
@@ -1004,13 +1008,14 @@ case 42:
 				}
 break;
 case 43:
-//#line 192 "sintaxis.y"
+//#line 196 "sintaxis.y"
 {yyval.sval = val_peek(0).sval; yyval.row=val_peek(0).row;
 					yyval.type = (String)(tds.getTupla(yyval.sval).getValue("tipo"));
+					yyval.sref = val_peek(0).sref;
 					}
 break;
 case 44:
-//#line 195 "sintaxis.y"
+//#line 200 "sintaxis.y"
 {
 					yyval.sval = val_peek(0).sval;
 					yyval.row=val_peek(0).row;
@@ -1019,7 +1024,7 @@ case 44:
 					}
 break;
 case 45:
-//#line 203 "sintaxis.y"
+//#line 208 "sintaxis.y"
 {
 					setToNegative(val_peek(0));
 					yyval.sval="-"+val_peek(0).sval;
@@ -1028,7 +1033,7 @@ case 45:
 				}
 break;
 case 46:
-//#line 211 "sintaxis.y"
+//#line 216 "sintaxis.y"
 {
 						
 						TuplaTablaSimbolos tuplaReg = tds.getTupla(val_peek(2).sval);
@@ -1044,10 +1049,11 @@ case 46:
 							yyval.sval = val_peek(2).sval+"@"+val_peek(0).sval;
 							yyval.row = val_peek(2).row;
 						}
+						yyval.sref = crearHoja(yyval.sval);
 					}
 break;
 case 47:
-//#line 229 "sintaxis.y"
+//#line 235 "sintaxis.y"
 {
 				NodoArbol nodoCpo = crearNodo("CUERPO", val_peek(2).sref, val_peek(0).sref);
 				yyval.row = val_peek(3).row;
@@ -1057,11 +1063,11 @@ case 47:
 			}
 break;
 case 48:
-//#line 236 "sintaxis.y"
+//#line 242 "sintaxis.y"
 {yyerror("Falta sentencias luego del si");}
 break;
 case 49:
-//#line 237 "sintaxis.y"
+//#line 243 "sintaxis.y"
 {
 			NodoArbol nodoCpo = crearNodo("CUERPO", val_peek(0).sref, null);
 			yyval.row = val_peek(1).row;
@@ -1071,7 +1077,7 @@ case 49:
 		}
 break;
 case 50:
-//#line 245 "sintaxis.y"
+//#line 251 "sintaxis.y"
 {
 				NodoArbol nodoCond = crearNodo("CONDICION", val_peek(2).sref, null);
 				NodoArbol nodoSi = crearNodo("SI", nodoCond, null);
@@ -1080,23 +1086,23 @@ case 50:
 			}
 break;
 case 51:
-//#line 251 "sintaxis.y"
+//#line 257 "sintaxis.y"
 {yyerror("Error en la comparacion");}
 break;
 case 53:
-//#line 252 "sintaxis.y"
+//#line 258 "sintaxis.y"
 {yyerror("Falta caracter '('");}
 break;
 case 54:
-//#line 253 "sintaxis.y"
+//#line 259 "sintaxis.y"
 {yyerror("No se encontro el caracter ')'"); }
 break;
 case 55:
-//#line 254 "sintaxis.y"
+//#line 260 "sintaxis.y"
 {yyerror("Falta la palabra reservada 'entonces'");}
 break;
 case 56:
-//#line 257 "sintaxis.y"
+//#line 263 "sintaxis.y"
 {
 				NodoArbol nodo = crearNodo(val_peek(1).sval, val_peek(2).sref, val_peek(0).sref);
 				yyval.row = val_peek(2).row;
@@ -1105,7 +1111,7 @@ case 56:
 			}
 break;
 case 57:
-//#line 265 "sintaxis.y"
+//#line 271 "sintaxis.y"
 {
 					ParserVal a = val_peek(0);
 					yyval = val_peek(0);
@@ -1113,7 +1119,7 @@ case 57:
 					}
 break;
 case 58:
-//#line 271 "sintaxis.y"
+//#line 277 "sintaxis.y"
 {
 					yyval = val_peek(0);
 					ParserVal a = val_peek(0);
@@ -1121,25 +1127,25 @@ case 58:
 				}
 break;
 case 59:
-//#line 278 "sintaxis.y"
+//#line 284 "sintaxis.y"
 {yyval = val_peek(1);}
 break;
 case 60:
-//#line 281 "sintaxis.y"
+//#line 287 "sintaxis.y"
 {
 				yyval = val_peek(0);
 				yyval.sref = crearNodo("SINO", val_peek(0).sref, null);
 			}
 break;
 case 61:
-//#line 285 "sintaxis.y"
+//#line 291 "sintaxis.y"
 {
 		yyval = val_peek(0);
 		yyval.sref = crearNodo("SINO", val_peek(0).sref, null);
 	}
 break;
 case 62:
-//#line 291 "sintaxis.y"
+//#line 297 "sintaxis.y"
 {
 				NodoArbol nodoCpo = crearNodo("CUERPO_IT", val_peek(0).sref, null);
 				yyval.row = val_peek(1).row;
@@ -1149,7 +1155,7 @@ case 62:
 			}
 break;
 case 63:
-//#line 299 "sintaxis.y"
+//#line 305 "sintaxis.y"
 {
 						NodoArbol nodoCond = crearNodo("CONDICION_IT", val_peek(2).sref, null);
 						NodoArbol nodoIt = crearNodo("ITERACION", nodoCond, null);
@@ -1158,31 +1164,31 @@ case 63:
 					}
 break;
 case 64:
-//#line 305 "sintaxis.y"
+//#line 311 "sintaxis.y"
 {yyerror("Falta caracter '('");}
 break;
 case 65:
-//#line 306 "sintaxis.y"
+//#line 312 "sintaxis.y"
 {yyerror("Error en la comparacion");}
 break;
 case 67:
-//#line 307 "sintaxis.y"
+//#line 313 "sintaxis.y"
 {yyerror("No se encontro el caracter ')'"); }
 break;
 case 68:
-//#line 308 "sintaxis.y"
+//#line 314 "sintaxis.y"
 {yyerror("Falta la palabra reservada 'iterar'");}
 break;
 case 70:
-//#line 311 "sintaxis.y"
+//#line 317 "sintaxis.y"
 {yyval = val_peek(0);}
 break;
 case 71:
-//#line 312 "sintaxis.y"
+//#line 318 "sintaxis.y"
 {yyval = val_peek(0);}
 break;
 case 72:
-//#line 315 "sintaxis.y"
+//#line 321 "sintaxis.y"
 {
 			yyval = val_peek(4);
 			NodoArbol hoja = crearHoja(val_peek(2).sval);
@@ -1190,14 +1196,14 @@ case 72:
 		}
 break;
 case 73:
-//#line 320 "sintaxis.y"
+//#line 326 "sintaxis.y"
 {yyerror("Cadena de caracteres mal definida");}
 break;
 case 75:
-//#line 321 "sintaxis.y"
+//#line 327 "sintaxis.y"
 {yyerror("la sentencia debe finalizar con el caracter ';'");}
 break;
-//#line 1120 "Parser.java"
+//#line 1130 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

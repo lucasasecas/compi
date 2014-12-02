@@ -56,6 +56,13 @@ public class NodoArbol {
 		
 		
 	}
+	
+	public NodoArbol clone(){
+		NodoArbol aux = new NodoArbol(this.value);
+		aux.setHijoIzq(this.hijoIzq==null?null:this.hijoIzq.clone());
+		aux.setHijoDer(this.hijoDer==null?null:this.hijoDer.clone());
+		return aux;
+	}
 	public boolean hijosHoja() {
 		
 		if((hijoIzq != null && hijoIzq.esHoja() && hijoDer== null)
@@ -66,6 +73,11 @@ public class NodoArbol {
 	}
 	public boolean esHoja() {
 		return hijoDer == null && hijoIzq == null;
+	}
+	public int indexOf(NodoArbol containded) {
+		if (containded == this.hijoIzq)
+			return 0;
+		return 1;
 	}
 	
 	

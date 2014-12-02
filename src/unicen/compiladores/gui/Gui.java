@@ -4,6 +4,7 @@ import gc_Assembler.GeneradorAssembler;
 import gc_Assembler.NodoArbol;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,17 +21,20 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.JToolBar;
 
 import Utils.TablaSimbolo;
 import al_Main.AnalizadorLexico;
 import as_Parser.Parser;
+import unicen.compiladores.gui.panels.ArbolPane;
 import unicen.compiladores.gui.panels.ErrorPane;
 import unicen.compiladores.gui.panels.SentenciasPane;
 import unicen.compiladores.gui.panels.SourcePane;
@@ -62,6 +66,10 @@ public class Gui extends JFrame implements ActionListener, MouseListener{
 	private SentenciaManager sentenciasManager;
 	private SentenciasPane sentenciasPnl;
 	private JButton btnSave;
+	private ArbolPane arbolPnl;
+	private JDialog dialogoErrores;
+	private SourcePane assemblerPnl;
+	private String nombreSource;
 
 	/**
 	 * Launch the application.
@@ -102,17 +110,23 @@ public class Gui extends JFrame implements ActionListener, MouseListener{
 		
 		this.sourcePnl = new SourcePane(this);
 		this.tdsPnl = new TDSPane();
-		this.tokensPnl = new TokensPane();
+		//this.tokensPnl = new TokensPane();
 		this.errorsPnl = new ErrorPane();
-		this.sentenciasPnl = new SentenciasPane();
+		//this.sentenciasPnl = new SentenciasPane();
+		this.assemblerPnl = new SourcePane(this);
+
+		this.arbolPnl = new ArbolPane();
 		
 		this.tabPane = new JTabbedPane();
 		
+		
 		this.tabPane.add("Fuente", this.sourcePnl);
 		this.tabPane.add("TDS", this.tdsPnl);
-		this.tabPane.add("Tokens", this.tokensPnl);
+		//this.tabPane.add("Tokens", this.tokensPnl);
 		this.tabPane.add("Errores", this.errorsPnl);
-		this.tabPane.add("Estructuras Sintacticas", this.sentenciasPnl);
+		//this.tabPane.add("Estructuras Sintacticas", this.sentenciasPnl);
+		this.tabPane.add("Arbol Sintactico", this.arbolPnl);
+		this.tabPane.add("Codigo Assembler", this.assemblerPnl);
 		
 		//Boton nuevo
 		this.btnNew = new JButton(Icons.NEW);
@@ -194,7 +208,7 @@ public class Gui extends JFrame implements ActionListener, MouseListener{
 			this.newFile();
 			break;
 		case "save":
-			this.saveFile();
+			this.saveFile("txt");
 			break;
 		case "load":
 			this.reset();
@@ -213,14 +227,47 @@ public class Gui extends JFrame implements ActionListener, MouseListener{
 	private void run() {
 		if(!isDirty("Antes de ejectuar se debe guardar los cambios")){
 			this.reset();
-			NodoArbol nodo = parser.run(this.fileName);
-			GeneradorAssembler as = new GeneradorAssembler(tds, this.fileName+".asm", nodo);
+			NodoArbol nodo = parser.run(nombreSource);
 			tdsPnl.generateTable(tds);
-			tokensPnl.generateTable(parser.getTokens());
+			//tokensPnl.generateTable(parser.getTokens());
 			errorsPnl.generateTable(errorManager.getAllErrors());
-			sentenciasPnl.generateTable(sentenciasManager.getAllSentencias());
+			if (parser.errorManager.isEmpty()){
+				String nombre = this.getFileName(true, "asm", "Donde desea guardar el archivo?");
+				GeneradorAssembler as = new GeneradorAssembler(tds, nombre, nodo.clone());
+				arbolPnl.generateTable(nodo);
+				loadAssembler(as);
+				
+			}else{
+				JOptionPane.showMessageDialog(this, "Se ha detenido la compilacion debido a que se han encontrado errores",
+						"Error", JOptionPane.ERROR_MESSAGE);
+			}
 			
 		}
+		
+	}
+
+	private void loadAssembler(GeneradorAssembler as) {
+
+		BufferedReader  br;
+		try {
+			this.assemblerPnl.clean();
+			br = new BufferedReader(new FileReader(as.getNombreArchivo()));
+			String current="";
+			while((current = br.readLine()) != null){
+				this.assemblerPnl.append(current+'\n');
+			}
+			br.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally{
+			
+		}
+		
+	
 		
 	}
 
@@ -234,7 +281,7 @@ public class Gui extends JFrame implements ActionListener, MouseListener{
 					this.sourcePnl.append(current+'\n');
 				}
 				br.close();
-				this.fileName = name;
+				this.nombreSource = name;
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -266,11 +313,11 @@ public class Gui extends JFrame implements ActionListener, MouseListener{
 		
 	}
 
-	private boolean saveFile() {
+	private boolean saveFile(String ext) {
 		String name;
 		if(this.fileName==null)
-			name = this.getFileName(true,".txt","Guardar archivo ...");
-		else name = this.fileName;
+			name = this.getFileName(true,ext,"Guardar archivo ...");
+		else name = this.nombreSource;
 		
 		  try {
    		      PrintWriter os = new PrintWriter(new FileOutputStream(name));
@@ -289,6 +336,9 @@ public class Gui extends JFrame implements ActionListener, MouseListener{
 	
 	private String getFileName(boolean save,String ext,String title) {
 	    final JFileChooser fileChooser=new JFileChooser();
+	    ext = ext==""?"txt":ext;
+	    FileNameExtensionFilter filter = new FileNameExtensionFilter(ext, ext);
+	    fileChooser.setFileFilter(filter);
 	    fileChooser.setDialogTitle(title);
 	    fileChooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
 	    int result;
@@ -315,7 +365,7 @@ public class Gui extends JFrame implements ActionListener, MouseListener{
             JOptionPane.YES_NO_CANCEL_OPTION,JOptionPane.WARNING_MESSAGE);
         switch (result) {
             case JOptionPane.YES_OPTION:
-                if (saveFile()) return false;
+                if (saveFile("txt")) return false;
                 break;
             case JOptionPane.NO_OPTION:
                 return false;

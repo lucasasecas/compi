@@ -18,4 +18,8 @@ public class ErrorManager {
 		return errores;
 	}
 
+	public boolean isEmpty() {
+		return errores.size()==0;
+	}
+
 }

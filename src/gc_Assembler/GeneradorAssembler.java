@@ -1,6 +1,8 @@
 package gc_Assembler;
 
+import java.io.FileReader;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Stack;
@@ -22,12 +24,13 @@ public class GeneradorAssembler {
 	private PrintWriter archivo;
 	private NodoArbol raiz;
 	private int countLabels;
-		
+	private String path;
 	public GeneradorAssembler(TablaSimbolo tds, String pathArchivo, NodoArbol nodo){
 		_tds = tds;
 		intermedio = new Vector<String>();
 		labels = new Stack<Integer>();
 		raiz = nodo;
+		path = pathArchivo;
 		try{
 			this.archivo = new PrintWriter(pathArchivo);
 			this.generarEncabezados();
@@ -414,4 +417,9 @@ public class GeneradorAssembler {
 //		return false;
 //	}
 //
+
+	public String getNombreArchivo() {
+		
+		return this.path;
+	}
 }
