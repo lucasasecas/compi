@@ -81,10 +81,17 @@ public class ErrorPane extends JPanel {
 				return data.get(row).getNroLine();
 			}
 			if(col==1){
-				return data.get(row).getType() == ParserError.TYPE_LEXICO?"Lexico" : "Sintactico";
+				if(data.get(row).getType() == ParserError.TYPE_LEXICO)
+					return "Lexico";
+				else if(data.get(row).getType() == ParserError.TYPE_SINTACTICO)
+					return "Sintactico";
+				else
+					return "Semantico";
+				
 			}
 			if(col==2){
-				return data.get(row).getMensaje();
+				String warning = data.get(row).isWarning() ? "(warning)":"";
+				return warning + data.get(row).getMensaje();
 			}
 			return null;
 		}

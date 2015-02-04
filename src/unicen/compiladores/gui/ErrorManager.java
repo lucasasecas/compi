@@ -22,4 +22,12 @@ public class ErrorManager {
 		return errores.size()==0;
 	}
 
+	public boolean noErrors() {
+		for(ParserError error : errores){
+			if(!error.isWarning())
+				return false;
+		}
+		return true;
+	}
+
 }

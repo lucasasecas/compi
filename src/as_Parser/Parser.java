@@ -434,7 +434,7 @@ final static String yyrule[] = {
 "Salida : IMPRIMIR '(' STR ')' error",
 };
 
-//#line 331 "sintaxis.y"
+//#line 420 "sintaxis.y"
 Vector<NodoArbol> sentencias;
 TablaSimbolo tds;
 AnalizadorLexico al;
@@ -540,7 +540,7 @@ private void setGlobalVars(ParserVal val_peek) {
 		}
 		if(tupla.getValue("uso") != null){
 			this.errorManager.addError(new ParserError("La variable "+val.sval+" ya fue definida",
-					ParserError.TYPE_SINTACTICO, val.row, false));
+					ParserError.TYPE_SEMANTICO, val.row, false));
 			return;
 		}
 		else{
@@ -560,6 +560,7 @@ private boolean existsID(String id){
 
 private void setRecordInnerVars(List<ParserVal> innerVars, List<ParserVal> regVars) {
 	for(ParserVal val : innerVars){
+		try{
 		TuplaTablaSimbolos tupla = tds.getTupla(val.sval);
 //		chequeo que no este ya definida si lo esta creo una nueva
 		if(tupla.getValue("uso") != null){
@@ -581,18 +582,21 @@ private void setRecordInnerVars(List<ParserVal> innerVars, List<ParserVal> regVa
 			TuplaTablaSimbolos tuplaReg = tds.getTupla(rVal.sval);
 			if(tuplaReg.getValue("uso") != null){
 				this.errorManager.addError(new ParserError("No se puede utilizar el identificador "+rVal.sval+" ya fue definida dentro del ambito global",
-					ParserError.TYPE_SINTACTICO, rVal.row, false));
+					ParserError.TYPE_SEMANTICO, rVal.row, false));
 				continue;
 			}
 			this.addUse("registro", rVal.sval);
 			if(tds.getTupla(rVal.sval + "@" + tupla.getValue("valor")) != null){
 				this.errorManager.addError(new ParserError("La variable "+val.sval+" ya fue definida dentro del registro",
-					ParserError.TYPE_SINTACTICO, val.row, false));
+					ParserError.TYPE_SEMANTICO, val.row, false));
 				return;
 			}
 			TuplaTablaSimbolos nueva = tupla.clone();
 			nueva.setValue("valor", rVal.sval + "@" + tupla.getValue("valor"));
 			tds.addTupla(nueva);;
+		}
+		}catch(NullPointerException e){
+			e.printStackTrace();
 		}
 	
 	}	
@@ -611,13 +615,17 @@ private NodoArbol crearNodo(String val, NodoArbol izq, NodoArbol der) {
 }
 
 private void checkTypes(ParserVal val1, ParserVal val2) {
-	if(!val1.type.equals(val2.type)){
-		errorManager.addError(new ParserError("No se permiten operaciones o asignaciones "
-				+ "entre elementos de distinto tipo", ParserError.TYPE_SINTACTICO, val1.row, false));
+	try{
+		if(!val1.type.equals(val2.type)){
+			errorManager.addError(new ParserError("No se permiten operaciones o asignaciones "
+				+ "entre elementos de distinto tipo", ParserError.TYPE_SEMANTICO, val1.row, false));
+				
+		}
+	}catch(NullPointerException e){
+		e.printStackTrace();
 	}
-	
 }
-//#line 549 "Parser.java"
+//#line 553 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -920,68 +928,93 @@ break;
 case 35:
 //#line 127 "sintaxis.y"
 {
+			try{
 			checkTypes(val_peek(2), val_peek(0));
 			NodoArbol nodo = crearNodo("+", val_peek(2).sref, val_peek(0).sref);
 			yyval.sval= "+";
 			yyval.row = val_peek(2).row;
 			yyval.sref = nodo;
 			yyval.type=val_peek(2).type;
+			}catch(NullPointerException e){
+				e.printStackTrace();
+			}
 		}
 break;
 case 36:
-//#line 135 "sintaxis.y"
+//#line 139 "sintaxis.y"
 {
+			try{
 			checkTypes(val_peek(2), val_peek(0));
 			NodoArbol nodo = crearNodo("-", val_peek(2).sref, val_peek(0).sref);
 			yyval.sval= "-";
 			yyval.row = val_peek(2).row;
 			yyval.sref = nodo;
 			yyval.type=val_peek(2).type;
+			}catch(NullPointerException e){
+				e.printStackTrace();
+			}
 		}
 break;
 case 37:
-//#line 143 "sintaxis.y"
+//#line 151 "sintaxis.y"
 {
+			try{
 			yyval.sval=val_peek(0).sval;
 			yyval.row = val_peek(0).row;
 			yyval.sref =  val_peek(0).sref;
 			yyval.type=val_peek(0).type;
+			}catch(NullPointerException e){
+				e.printStackTrace();
+			}
 		}
 break;
 case 38:
-//#line 151 "sintaxis.y"
+//#line 163 "sintaxis.y"
 {
+			try{
 			checkTypes(val_peek(2), val_peek(0));
 			NodoArbol nodo = crearNodo("*", val_peek(2).sref, val_peek(0).sref);
 			yyval.sval= "*";
 			yyval.row = val_peek(2).row;
 			yyval.sref = nodo;
 			yyval.type=val_peek(2).type;
+			}catch(NullPointerException e){
+				e.printStackTrace();
+			}
 		}
 break;
 case 39:
-//#line 159 "sintaxis.y"
+//#line 175 "sintaxis.y"
 {
+			try{
 			checkTypes(val_peek(2), val_peek(0));
 			NodoArbol nodo = crearNodo("/", val_peek(2).sref, val_peek(0).sref);
 			yyval.sval= "/";
 			yyval.row = val_peek(2).row;
 			yyval.sref = nodo;
 			yyval.type=val_peek(2).type;
+			}catch(NullPointerException e){
+				e.printStackTrace();
+			}
 		}
 break;
 case 40:
-//#line 167 "sintaxis.y"
+//#line 187 "sintaxis.y"
 {
+		try{
 			yyval.sval=val_peek(0).sval;
 			yyval.row = val_peek(0).row;
 			yyval.sref =  val_peek(0).sref;
 			yyval.type = val_peek(0).type;
+		}catch(NullPointerException e){
+			e.printStackTrace();
+		}
 	}
 break;
 case 41:
-//#line 174 "sintaxis.y"
+//#line 198 "sintaxis.y"
 {
+			try{
 				TuplaTablaSimbolos tupla = tds.getTupla(val_peek(0).sval);
 				if (tupla==null || tupla.getValue("uso") == null){
 					yyerror("La variable "+val_peek(0).sval+"' no ha sido declarada");
@@ -990,52 +1023,72 @@ case 41:
 				}
 				else if(tupla.getValue("uso") == "registro")
 					yyerror("Solo se permite llamados a elementos de registro");
-				
+				else
+					yyval.type = (String)(tds.getTupla(val_peek(0).sval).getValue("tipo"));
 				yyval.sval=val_peek(0).sval;
 				yyval.row = val_peek(0).row;
 				yyval.sref =  crearHoja(val_peek(0).sval);
-				yyval.type = (String)(tds.getTupla(yyval.sval).getValue("tipo"));
-		    }
+			}catch(NullPointerException e){
+				e.printStackTrace();
+			}		
+		}
 break;
 case 42:
-//#line 189 "sintaxis.y"
+//#line 217 "sintaxis.y"
 {
+			try{
 				verificarRango(val_peek(0).sval, val_peek(0).row);
 				yyval.sval=val_peek(0).sval;
 				yyval.row = val_peek(0).row;
 				yyval.sref =  crearHoja(val_peek(0).sval);
-				yyval.type = (String)(tds.getTupla(yyval.sval).getValue("tipo"));
-				}
+				yyval.type = tds.getTupla(yyval.sval)!=null ? (String)(tds.getTupla(yyval.sval).getValue("tipo")) : "";
+			}catch(NullPointerException e){
+				e.printStackTrace();
+			}
+		}
 break;
 case 43:
-//#line 196 "sintaxis.y"
-{yyval.sval = val_peek(0).sval; yyval.row=val_peek(0).row;
+//#line 228 "sintaxis.y"
+{
+				try{
+					yyval.sval = val_peek(0).sval; yyval.row=val_peek(0).row;
 					yyval.type = (String)(tds.getTupla(yyval.sval).getValue("tipo"));
 					yyval.sref = val_peek(0).sref;
-					}
+				}catch(NullPointerException e){
+					e.printStackTrace();
+				}
+			}
 break;
 case 44:
-//#line 200 "sintaxis.y"
+//#line 237 "sintaxis.y"
 {
-					yyval.sval = val_peek(0).sval;
-					yyval.row=val_peek(0).row;
-					yyval.type = (String)(tds.getTupla(yyval.sval).getValue("tipo"));
-					yyval.sref = val_peek(0).sref;
+					try{
+						yyval.sval = val_peek(0).sval;
+						yyval.row=val_peek(0).row;
+						yyval.type = tds.getTupla(yyval.sval)!=null ? (String)(tds.getTupla(yyval.sval).getValue("tipo")) : "";
+						yyval.sref = val_peek(0).sref;
+					}catch(NullPointerException e){
+						e.printStackTrace();
+					}
 					}
 break;
 case 45:
-//#line 208 "sintaxis.y"
+//#line 249 "sintaxis.y"
 {
+				try{
 					setToNegative(val_peek(0));
 					yyval.sval="-"+val_peek(0).sval;
 					yyval.sref = crearHoja(yyval.sval);
 					yyval.row = val_peek(0).row;
+				}catch(NullPointerException e){
+					e.printStackTrace();
+				}
 				}
 break;
 case 46:
-//#line 216 "sintaxis.y"
+//#line 261 "sintaxis.y"
 {
-						
+					try{						
 						TuplaTablaSimbolos tuplaReg = tds.getTupla(val_peek(2).sval);
 						TuplaTablaSimbolos tuplaInterna = tds.getTupla(val_peek(2).sval+"@"+val_peek(0).sval);
 						if(tuplaReg==null || tuplaReg.getValue("uso")==null){
@@ -1050,76 +1103,100 @@ case 46:
 							yyval.row = val_peek(2).row;
 						}
 						yyval.sref = crearHoja(yyval.sval);
+					}catch(NullPointerException e){
+						e.printStackTrace();
+					}
 					}
 break;
 case 47:
-//#line 235 "sintaxis.y"
+//#line 283 "sintaxis.y"
 {
+			try{
 				NodoArbol nodoCpo = crearNodo("CUERPO", val_peek(2).sref, val_peek(0).sref);
 				yyval.row = val_peek(3).row;
 				yyval.sval = val_peek(3).sval;
 				yyval.sref = val_peek(3).sref;
 				yyval.sref.setHijoDer(nodoCpo);
+			}catch(NullPointerException e){
+				e.printStackTrace();
+			}
 			}
 break;
 case 48:
-//#line 242 "sintaxis.y"
+//#line 294 "sintaxis.y"
 {yyerror("Falta sentencias luego del si");}
 break;
 case 49:
-//#line 243 "sintaxis.y"
+//#line 295 "sintaxis.y"
 {
+			try{
 			NodoArbol nodoCpo = crearNodo("CUERPO", val_peek(0).sref, null);
 			yyval.row = val_peek(1).row;
 			yyval.sval = val_peek(1).sval;
 			yyval.sref = val_peek(1).sref;
-			yyval.sref.setHijoDer(nodoCpo);
+			if(yyval.sref!=null)
+				yyval.sref.setHijoDer(nodoCpo);
+			}catch(NullPointerException e){
+				e.printStackTrace();
+			}
 		}
 break;
 case 50:
-//#line 251 "sintaxis.y"
+//#line 308 "sintaxis.y"
 {
-				NodoArbol nodoCond = crearNodo("CONDICION", val_peek(2).sref, null);
-				NodoArbol nodoSi = crearNodo("SI", nodoCond, null);
-				yyval = val_peek(4);
-				yyval.sref = nodoSi;
+				try{
+					NodoArbol nodoCond = crearNodo("CONDICION", val_peek(2).sref, null);
+					NodoArbol nodoSi = crearNodo("SI", nodoCond, null);
+					yyval = val_peek(4);
+					yyval.sref = nodoSi;
+				}catch(NullPointerException e){
+					e.printStackTrace();
+				}
 			}
 break;
 case 51:
-//#line 257 "sintaxis.y"
+//#line 318 "sintaxis.y"
 {yyerror("Error en la comparacion");}
 break;
 case 53:
-//#line 258 "sintaxis.y"
+//#line 319 "sintaxis.y"
 {yyerror("Falta caracter '('");}
 break;
 case 54:
-//#line 259 "sintaxis.y"
+//#line 320 "sintaxis.y"
 {yyerror("No se encontro el caracter ')'"); }
 break;
 case 55:
-//#line 260 "sintaxis.y"
+//#line 321 "sintaxis.y"
 {yyerror("Falta la palabra reservada 'entonces'");}
 break;
 case 56:
-//#line 263 "sintaxis.y"
+//#line 324 "sintaxis.y"
 {
-				NodoArbol nodo = crearNodo(val_peek(1).sval, val_peek(2).sref, val_peek(0).sref);
-				yyval.row = val_peek(2).row;
-				yyval.sval = val_peek(1).sval;
-				yyval.sref = nodo;				
+				try{
+					NodoArbol nodo = crearNodo(val_peek(1).sval, val_peek(2).sref, val_peek(0).sref);
+					yyval.row = val_peek(2).row;
+					yyval.sval = val_peek(1).sval;
+					yyval.sref = nodo;
+				}catch(NullPointerException e){
+					e.printStackTrace();
+				}
 			}
 break;
 case 57:
-//#line 271 "sintaxis.y"
+//#line 336 "sintaxis.y"
 {
-					ParserVal a = val_peek(0);
-					yyval = val_peek(0);
-					yyval.sref = crearNodo("ENTONCES", val_peek(0).sref, null);
+					try{
+						ParserVal a = val_peek(0);
+						yyval = val_peek(0);
+						yyval.sref = crearNodo("ENTONCES", val_peek(0).sref, null);
+					}catch(NullPointerException e){
+						e.printStackTrace();
+					}
 					}
 break;
 case 58:
-//#line 277 "sintaxis.y"
+//#line 346 "sintaxis.y"
 {
 					yyval = val_peek(0);
 					ParserVal a = val_peek(0);
@@ -1127,83 +1204,103 @@ case 58:
 				}
 break;
 case 59:
-//#line 284 "sintaxis.y"
+//#line 353 "sintaxis.y"
 {yyval = val_peek(1);}
 break;
 case 60:
-//#line 287 "sintaxis.y"
+//#line 356 "sintaxis.y"
 {
-				yyval = val_peek(0);
-				yyval.sref = crearNodo("SINO", val_peek(0).sref, null);
+				try{
+					yyval = val_peek(0);
+					yyval.sref = crearNodo("SINO", val_peek(0).sref, null);
+				}catch(NullPointerException e){
+					e.printStackTrace();
+				}
 			}
 break;
 case 61:
-//#line 291 "sintaxis.y"
+//#line 364 "sintaxis.y"
 {
-		yyval = val_peek(0);
-		yyval.sref = crearNodo("SINO", val_peek(0).sref, null);
+		try{
+			yyval = val_peek(0);
+			yyval.sref = crearNodo("SINO", val_peek(0).sref, null);
+		}catch(NullPointerException e){
+			e.printStackTrace();
+		}
 	}
 break;
 case 62:
-//#line 297 "sintaxis.y"
+//#line 374 "sintaxis.y"
 {
-				NodoArbol nodoCpo = crearNodo("CUERPO_IT", val_peek(0).sref, null);
-				yyval.row = val_peek(1).row;
-				yyval.sval = val_peek(1).sval;
-				yyval.sref = val_peek(1).sref;
-				yyval.sref.setHijoDer(nodoCpo);
+				try{
+					NodoArbol nodoCpo = crearNodo("CUERPO_IT", val_peek(0).sref, null);
+					yyval.row = val_peek(1).row;
+					yyval.sval = val_peek(1).sval;
+					yyval.sref = val_peek(1).sref;
+					yyval.sref.setHijoDer(nodoCpo);
+				}catch(NullPointerException e){
+					e.printStackTrace();
+				}
 			}
 break;
 case 63:
-//#line 305 "sintaxis.y"
+//#line 386 "sintaxis.y"
 {
-						NodoArbol nodoCond = crearNodo("CONDICION_IT", val_peek(2).sref, null);
-						NodoArbol nodoIt = crearNodo("ITERACION", nodoCond, null);
-						yyval = val_peek(4);
-						yyval.sref = nodoIt;
+						try{
+							NodoArbol nodoCond = crearNodo("CONDICION_IT", val_peek(2).sref, null);
+							NodoArbol nodoIt = crearNodo("ITERACION", nodoCond, null);
+							yyval = val_peek(4);
+							yyval.sref = nodoIt;
+						}catch(NullPointerException e){
+							e.printStackTrace();
+						}
 					}
 break;
 case 64:
-//#line 311 "sintaxis.y"
+//#line 396 "sintaxis.y"
 {yyerror("Falta caracter '('");}
 break;
 case 65:
-//#line 312 "sintaxis.y"
+//#line 397 "sintaxis.y"
 {yyerror("Error en la comparacion");}
 break;
 case 67:
-//#line 313 "sintaxis.y"
+//#line 398 "sintaxis.y"
 {yyerror("No se encontro el caracter ')'"); }
 break;
 case 68:
-//#line 314 "sintaxis.y"
+//#line 399 "sintaxis.y"
 {yyerror("Falta la palabra reservada 'iterar'");}
 break;
 case 70:
-//#line 317 "sintaxis.y"
+//#line 402 "sintaxis.y"
 {yyval = val_peek(0);}
 break;
 case 71:
-//#line 318 "sintaxis.y"
+//#line 403 "sintaxis.y"
 {yyval = val_peek(0);}
 break;
 case 72:
-//#line 321 "sintaxis.y"
+//#line 406 "sintaxis.y"
 {
-			yyval = val_peek(4);
-			NodoArbol hoja = crearHoja(val_peek(2).sval);
-			yyval.sref = crearNodo("IMPRIMIR", hoja, null);
+			try{
+				yyval = val_peek(4);
+				NodoArbol hoja = crearHoja(val_peek(2).sval);
+				yyval.sref = crearNodo("IMPRIMIR", hoja, null);
+			}catch(NullPointerException e){
+					e.printStackTrace();
+			}
 		}
 break;
 case 73:
-//#line 326 "sintaxis.y"
+//#line 415 "sintaxis.y"
 {yyerror("Cadena de caracteres mal definida");}
 break;
 case 75:
-//#line 327 "sintaxis.y"
+//#line 416 "sintaxis.y"
 {yyerror("la sentencia debe finalizar con el caracter ';'");}
 break;
-//#line 1130 "Parser.java"
+//#line 1223 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

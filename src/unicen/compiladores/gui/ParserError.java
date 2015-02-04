@@ -4,6 +4,7 @@ public class ParserError {
 
 	public static final int TYPE_SINTACTICO = 0;
 	public static final int TYPE_LEXICO = 1;
+	public static final int TYPE_SEMANTICO = 2;
 	
 
 
@@ -47,6 +48,10 @@ public class ParserError {
 
 	public void setNroLine(int nroLine) {
 		this.nroLine = nroLine;
+	}
+	
+	public boolean isWarning(){
+		return isWarning;
 	}
 	
 	

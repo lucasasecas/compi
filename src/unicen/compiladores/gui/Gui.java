@@ -231,7 +231,7 @@ public class Gui extends JFrame implements ActionListener, MouseListener{
 			tdsPnl.generateTable(tds);
 			//tokensPnl.generateTable(parser.getTokens());
 			errorsPnl.generateTable(errorManager.getAllErrors());
-			if (parser.errorManager.isEmpty()){
+			if (parser.errorManager.noErrors()){
 				String nombre = this.getFileName(true, "asm", "Donde desea guardar el archivo?");
 				GeneradorAssembler as = new GeneradorAssembler(tds, nombre, nodo.clone());
 				arbolPnl.generateTable(nodo);
