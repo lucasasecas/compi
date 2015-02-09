@@ -565,10 +565,19 @@ private boolean existsID(String id){
 }
 
 private void setRecordInnerVars(List<ParserVal> innerVars, List<ParserVal> regVars) {
+	for(ParserVal rVal : regVars){
+		TuplaTablaSimbolos tuplaReg = tds.getTupla(rVal.sval);
+		if(tuplaReg.getValue("uso") != null){
+			this.errorManager.addError(new ParserError("No se puede utilizar el identificador "+rVal.sval+" ya fue definida dentro del ambito global",
+				ParserError.TYPE_SEMANTICO, rVal.row, false));
+			continue;
+		}
+	}
 	for(ParserVal val : innerVars){
 		TuplaTablaSimbolos tupla = tds.getTupla(val.sval);
 //		chequeo que no este ya definida si lo esta creo una nueva
-		if(tupla.getValue("uso") != null){
+		if(tupla==null) continue;
+		if(tupla != null && tupla.getValue("uso") != null){
 			tupla = new TuplaTablaSimbolos();
 			tupla.setValue("row", val.row);
 			tupla.setValue("clase", val.kind);
@@ -585,11 +594,7 @@ private void setRecordInnerVars(List<ParserVal> innerVars, List<ParserVal> regVa
 		 */
 		for(ParserVal rVal : regVars){
 			TuplaTablaSimbolos tuplaReg = tds.getTupla(rVal.sval);
-			if(tuplaReg.getValue("uso") != null){
-				this.errorManager.addError(new ParserError("No se puede utilizar el identificador "+rVal.sval+" ya fue definida dentro del ambito global",
-					ParserError.TYPE_SEMANTICO, rVal.row, false));
-				continue;
-			}
+			
 			this.addUse("registro", rVal.sval);
 			if(tds.getTupla(rVal.sval + "@" + tupla.getValue("valor")) != null){
 				this.errorManager.addError(new ParserError("La variable "+val.sval+" ya fue definida dentro del registro",
@@ -618,6 +623,7 @@ private NodoArbol crearNodo(String val, NodoArbol izq, NodoArbol der) {
 
 private void checkTypes(ParserVal val1, ParserVal val2) {
 	try{
+		if(val2.type==null)return;
 		if(!val1.type.equals(val2.type)){
 			errorManager.addError(new ParserError("No se permiten operaciones o asignaciones "
 				+ "entre elementos de distinto tipo", ParserError.TYPE_SEMANTICO, val1.row, false));
@@ -645,7 +651,7 @@ private void clearTds() {
 	}
 	
 }
-//#line 577 "Parser.java"
+//#line 578 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -1325,7 +1331,7 @@ case 75:
 //#line 421 "sintaxis.y"
 {yyerror("la sentencia debe finalizar con el caracter ';'");}
 break;
-//#line 1252 "Parser.java"
+//#line 1253 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####
